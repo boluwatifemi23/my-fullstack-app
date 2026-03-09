@@ -22,7 +22,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Smooth scroll helper
+ 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
 
@@ -31,7 +31,7 @@ export default function Navbar() {
       return;
     }
 
-    // If not on the home page, redirect to home and then scroll after render
+   
     router.push("/#menu");
   };
 
@@ -42,12 +42,12 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="relative transition-all duration-[1200ms] ease-in-out">
+      <div className="relative transition-all duration-1200 ease-in-out">
         <div
-          className={`absolute inset-0 transition-all duration-[1200ms] ease-in-out ${
+          className={`absolute inset-0 transition-all duration-1200ms ease-in-out ${
             scrolled
-              ? "bg-gradient-to-r from-black via-[#f54a00]/40 to-white/90 backdrop-blur-md"
-              : "bg-gradient-to-r from-[#f54a00]/70 via-orange-500/60 to-amber-400/70 bg-opacity-40 backdrop-blur-lg border-white/20 shadow-lg backdrop-saturate-150"
+              ? "bg-linear-to-r from-black via-[#f54a00]/40 to-white/90 backdrop-blur-md"
+              : "bg-linear-to-r from-[#f54a00]/70 via-orange-500/60 to-amber-400/70 bg-opacity-40 backdrop-blur-lg border-white/20 shadow-lg backdrop-saturate-150"
           }`}
         />
 
@@ -55,11 +55,11 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16">
             <Logo className="h-10 w-10" />
 
-            {/* DESKTOP NAV */}
+            
             <nav className="hidden md:flex items-center gap-6">
               <Link href="/" className={linkClass("/")}>Home</Link>
 
-              {/* 👉 Replace /menu with smooth scroll */}
+             
               <button
                 onClick={() => scrollToSection("menu")}
                 className="text-sm font-medium hover:text-[#f54a00] transition-colors"
@@ -72,7 +72,7 @@ export default function Navbar() {
               <Link href="/contact" className={linkClass("/contact")}>Contact</Link>
             </nav>
 
-            {/* CART ICON */}
+            
             <Link
               href="/cart"
               className="relative inline-flex items-center p-2 rounded-md hover:bg-white/10"
@@ -96,7 +96,7 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* AUTH */}
+            
             {user ? (
               <div className="flex items-center gap-2">
                 <Link href="/profile" className="flex items-center gap-2 hover:text-[#f54a00] transition">
@@ -127,7 +127,7 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* MOBILE MENU BUTTON */}
+            
             <button
               onClick={() => setOpen(!open)}
               aria-label={open ? "Close menu" : "Open menu"}
@@ -146,13 +146,13 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE MENU */}
+      
       {open && (
-        <div className="md:hidden bg-gradient-to-b from-[#f54a00] via-orange-600 to-amber-400 text-white">
+        <div className="md:hidden bg-linear-to-b from-[#f54a00] via-orange-600 to-amber-400 text-white">
           <div className="px-4 py-4 space-y-3">
             <Link href="/" className={linkClass("/")}>Home</Link>
 
-            {/* 👉 Smooth scroll for mobile too */}
+            
             <button onClick={() => scrollToSection("menu")} className="text-left">
               Menu
             </button>

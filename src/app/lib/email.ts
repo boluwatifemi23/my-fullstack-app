@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 
-
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -9,7 +8,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
 export async function sendWelcomeEmail(to: string, name: string) {
   await transporter.sendMail({
     from: '"Cornerstone Catering" <no-reply@cornerstone.com>',
@@ -17,17 +15,16 @@ export async function sendWelcomeEmail(to: string, name: string) {
     subject: "Welcome to Cornerstone Catering — Your Taste of Nigeria Awaits! 🍽️",
     html: `
       <div style="font-family: Arial, sans-serif; background-color: #fff8f0; padding: 20px; border-radius: 10px; color: #333;">
-        
         <div style="text-align: center;">
           <h2 style="color: #d35400; font-size: 28px;">Welcome, ${name}! 🎉</h2>
           <p style="font-size: 16px; line-height: 1.6;">
-            We’re excited to have you join the <strong>Cornerstone Catering</strong> family —
+            We're excited to have you join the <strong>Cornerstone Catering</strong> family —
             where every meal tells a story of authentic Nigerian flavor.
           </p>
         </div>
 
         <div style="margin-top: 20px;">
-          <h3 style="color: #27ae60;">What’s on the Menu?</h3>
+          <h3 style="color: #27ae60;">What's on the Menu?</h3>
           <p style="font-size: 15px; line-height: 1.6;">
             From smoky <strong>Jollof Rice</strong> to spicy <strong>Suya</strong>, 
             to rich <strong>Egusi</strong> and fluffy <strong>Pounded Yam</strong> —
@@ -41,7 +38,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
             You can now place orders, save your favorite meals, and enjoy exclusive member discounts.
           </p>
           <div style="text-align: center; margin-top: 20px;">
-            <a href="https://localhost:3000/login"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/login"
               style="background-color: #d35400; color: white; text-decoration: none; padding: 12px 20px; border-radius: 6px; font-weight: bold;">
               Explore Menu
             </a>
@@ -53,15 +50,12 @@ export async function sendWelcomeEmail(to: string, name: string) {
           <a href="https://instagram.com/cornerstonecatering" style="margin: 0 10px; color: #d35400;">Instagram</a> |
           <a href="https://facebook.com/cornerstonecatering" style="margin: 0 10px; color: #d35400;">Facebook</a> |
           <a href="https://twitter.com/cornerstonecaters" style="margin: 0 10px; color: #d35400;">Twitter</a>
-
           <p style="margin-top: 15px;">© 2025 Cornerstone Catering • Made with ❤️ in Minnesota</p>
         </div>
-
       </div>
     `,
   });
 }
-
 
 export async function sendOTPEmail(to: string, otp: string) {
   await transporter.sendMail({
@@ -70,37 +64,74 @@ export async function sendOTPEmail(to: string, otp: string) {
     subject: "Your Cornerstone Catering Password Reset OTP 🔐",
     html: `
       <div style="font-family: Arial, sans-serif; background-color: #fff8f0; padding: 20px; border-radius: 10px; color: #333;">
-        
         <div style="text-align: center;">
           <h2 style="color: #d35400; font-size: 28px;">Password Reset Code</h2>
           <p style="font-size: 16px; line-height: 1.6;">
-            Use the OTP below to reset your password.  
+            Use the OTP below to reset your password.
             It expires in <strong>10 minutes</strong>.
           </p>
         </div>
 
         <div style="text-align: center; margin: 30px 0;">
-          <div style="
-            display: inline-block;
-            padding: 15px 30px;
-            background-color: #d35400;
-            color: white;
-            font-size: 36px;
-            font-weight: bold;
-            border-radius: 10px;
-            letter-spacing: 8px;">
+          <div style="display: inline-block; padding: 15px 30px; background-color: #d35400; color: white; font-size: 36px; font-weight: bold; border-radius: 10px; letter-spacing: 8px;">
             ${otp}
           </div>
         </div>
 
         <p style="font-size: 15px; text-align: center; color: #555;">
-          If you did not request this, simply ignore the message.
+          If you did not request this, simply ignore this message.
         </p>
 
         <div style="margin-top: 30px; text-align: center; font-size: 14px; color: #aaa;">
           © 2025 Cornerstone Catering • Made with ❤️ in Minnesota
         </div>
+      </div>
+    `,
+  });
+}
 
+export async function sendContactEmail(data: {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+}) {
+  await transporter.sendMail({
+    from: `"Cornerstone Catering" <${process.env.EMAIL_USER}>`,
+    to: process.env.EMAIL_USER,
+    replyTo: data.email,
+    subject: `New Contact Message: ${data.subject}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; background-color: #fff8f0; padding: 20px; border-radius: 10px; color: #333;">
+        <h2 style="color: #d35400;">New Contact Form Message 📬</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+          <tr>
+            <td style="padding: 8px; font-weight: bold;">Name:</td>
+            <td style="padding: 8px;">${data.name}</td>
+          </tr>
+          <tr style="background: #fff3e0;">
+            <td style="padding: 8px; font-weight: bold;">Email:</td>
+            <td style="padding: 8px;">${data.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; font-weight: bold;">Phone:</td>
+            <td style="padding: 8px;">${data.phone || "Not provided"}</td>
+          </tr>
+          <tr style="background: #fff3e0;">
+            <td style="padding: 8px; font-weight: bold;">Subject:</td>
+            <td style="padding: 8px;">${data.subject}</td>
+          </tr>
+        </table>
+
+        <div style="margin-top: 20px; padding: 15px; background: #fff; border-left: 4px solid #d35400; border-radius: 4px;">
+          <strong>Message:</strong>
+          <p style="margin-top: 8px; line-height: 1.6;">${data.message}</p>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center; font-size: 13px; color: #aaa;">
+          © 2025 Cornerstone Catering • Made with ❤️ in Minnesota
+        </div>
       </div>
     `,
   });

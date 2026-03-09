@@ -32,7 +32,6 @@ export default function MenuSection() {
       setLoadingMeals(true);
       const res = await fetch("/api/meals");
       const data = await res.json();
-      // show a few featured meals (first 6)
       setFeatured(data.slice(0, 6));
       setLoadingMeals(false);
     };
@@ -45,7 +44,7 @@ export default function MenuSection() {
     <section className="py-12 max-w-7xl mx-auto px-6">
       <h2 className="text-3xl font-bold text-gray-800 mb-6">Menu</h2>
 
-      {/* Categories horizontal */}
+      
       <div className="mb-8">
         {loadingCats ? (
           <div className="flex gap-4">
@@ -62,7 +61,7 @@ export default function MenuSection() {
               <Link
                 key={cat.slug}
                 href={`/menu/${cat.slug}`}
-                className="min-w-[150px] px-4 py-2 rounded-xl bg-gradient-to-r from-orange-50 to-white border border-orange-200 shadow-sm hover:scale-105 transition"
+                className="min-w-[150px] px-4 py-2 rounded-xl bg-linear-to-r from-orange-50 to-white border border-orange-200 shadow-sm hover:scale-105 transition"
               >
                 <div className="font-semibold text-gray-800">{cat.name}</div>
               </Link>

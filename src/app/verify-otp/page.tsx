@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -16,7 +16,7 @@ export default function VerifyOtp() {
   e.preventDefault();
   setLoading(true);
 
-  // your logic
+ 
     const res = await fetch("/api/auth/verify-otp", {
       method: "POST",
       body: JSON.stringify({ email, otp }),
@@ -36,9 +36,9 @@ export default function VerifyOtp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-[#1a0f0a] to-black text-white">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-black via-[#1a0f0a] to-black text-white">
       <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-8 rounded-2xl w-full max-w-md shadow-xl animate-scaleIn">
-        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold text-center bg-linear-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent">
           Verify OTP
         </h2>
 
@@ -64,7 +64,7 @@ export default function VerifyOtp() {
 
           <button
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-400 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-40"
+            className="w-full bg-linear-to-r from-orange-500 to-amber-400 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-40"
           >
             {loading ? "Verifying..." : "Verify OTP"}
           </button>

@@ -16,7 +16,7 @@ export default function ResetPassword() {
   e.preventDefault();
   setLoading(true);
 
-  // your logic
+  
 
     const res = await fetch("/api/auth/reset-password", {
       method: "POST",
@@ -37,9 +37,9 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-[#1a0f0a] to-black text-white">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-black via-[#1a0f0a] to-black text-white">
       <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-8 rounded-2xl w-full max-w-md shadow-xl animate-slideUp">
-        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold text-center bg-linear-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent">
           Reset Password
         </h2>
 
@@ -59,7 +59,7 @@ export default function ResetPassword() {
 
           <button
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-400 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-40"
+            className="w-full bg-linear-to-r from-orange-500 to-amber-400 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-40"
           >
             {loading ? "Updating..." : "Reset Password"}
           </button>

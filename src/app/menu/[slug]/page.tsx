@@ -1,4 +1,3 @@
-
 import MealCardClient from "@/app/components/MealCardClient";
 import { connectDB } from "@/app/lib/dbConnect";
 import Category from "@/app/models/Category";
@@ -7,11 +6,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LeanCategoryDoc, LeanMealDoc } from "@/app/utils/mongoose-types";
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props) {
+  const { slug } = await params;
   await connectDB();
-  const cat = (await Category.findOne({ slug: params.slug })
+  const cat = (await Category.findOne({ slug })
     .lean()
     .exec()) as unknown as LeanCategoryDoc | null;
 
@@ -24,14 +24,11 @@ export async function generateMetadata({ params }: Props) {
 async function getCategoryData(slug: string) {
   await connectDB();
 
-  // Get category
   const categoryDoc = (await Category.findOne({ slug })
     .lean()
     .exec()) as unknown as LeanCategoryDoc | null;
 
-  if (!categoryDoc) {
-    return null;
-  }
+  if (!categoryDoc) return null;
 
   const category = {
     _id: categoryDoc._id.toString(),
@@ -39,7 +36,6 @@ async function getCategoryData(slug: string) {
     slug: categoryDoc.slug,
   };
 
-  // Get meals
   const mealsRaw = (await Meal.find({ category: slug })
     .sort({ name: 1 })
     .lean()
@@ -58,11 +54,10 @@ async function getCategoryData(slug: string) {
 }
 
 export default async function CategoryPage({ params }: Props) {
-  const data = await getCategoryData(params.slug);
+  const { slug } = await params;
+  const data = await getCategoryData(slug);
 
-  if (!data) {
-    notFound();
-  }
+  if (!data) notFound();
 
   const { category, meals } = data;
 
@@ -73,18 +68,8 @@ export default async function CategoryPage({ params }: Props) {
           href="/menu"
           className="text-orange-600 hover:text-orange-700 mb-4 inline-flex items-center gap-1 transition-colors"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Menu
         </Link>

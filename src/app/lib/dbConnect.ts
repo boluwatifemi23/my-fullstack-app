@@ -1,17 +1,4 @@
-// import mongoose from "mongoose";
 
-// const MONGO_URI = process.env.MONGO_URI as string;
-// if (!MONGO_URI) throw new Error("Error connecting to the database");
-
-// let isConnected = false;
-
-// export async function connectDB() {
-//   if (isConnected) return;
-//   const db = await mongoose.connect(MONGO_URI);
-//   isConnected = !!db.connections[0].readyState;
-// }
-
-// app/lib/dbConnect.ts
 import mongoose from "mongoose";
 
 const MONGO_URI = process.env.MONGO_URI as string;

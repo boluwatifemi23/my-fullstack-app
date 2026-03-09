@@ -1,5 +1,4 @@
-// app/menu/page.tsx - Alternative with images
-import Image from "next/image";
+
 import Link from "next/link";
 import { connectDB } from "@/app/lib/dbConnect";
 import Category from "@/app/models/Category";
@@ -15,7 +14,7 @@ export const metadata = {
 
 export const revalidate = 60;
 
-// Map category slugs to image paths
+
 const categoryImages: Record<string, string> = {
   "small-chops": "/images/assorted-meat.png",
   "soups-stews": "/images/assorted-meat.png",
@@ -28,7 +27,7 @@ const categoryImages: Record<string, string> = {
   accompaniments: "/images/assorted-meat.png",
 };
 
-// Gradient colors as fallback
+
 const categoryColors = [
   "from-orange-500 to-red-500",
   "from-amber-500 to-orange-500",
@@ -86,7 +85,7 @@ export default async function MenuIndexPage() {
         </p>
       </header>
 
-      {/* Categories row */}
+      
       <section className="mb-12">
         <h3 className="text-2xl font-semibold mb-4">Categories</h3>
         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
@@ -97,7 +96,7 @@ export default async function MenuIndexPage() {
               <Link
                 key={cat._id}
                 href={`/menu/${cat.slug}`}
-                className="min-w-[160px] flex-shrink-0 rounded-2xl overflow-hidden shadow-lg relative hover:shadow-xl transition-all transform hover:scale-105"
+                className="min-w-[160px] shrink-0 rounded-2xl overflow-hidden shadow-lg relative hover:shadow-xl transition-all transform hover:scale-105"
               >
                 <div className="relative w-40 h-24">
                   {hasImage ? (
@@ -110,12 +109,12 @@ export default async function MenuIndexPage() {
                         sizes="(max-width: 640px) 40vw, 160px"
                       />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                     </>
                   ) : (
-                    // Fallback gradient background
+                    
                     <div
-                      className={`absolute inset-0 bg-gradient-to-br ${
+                      className={`absolute inset-0 bg-linear-to-br ${
                         categoryColors[idx % categoryColors.length]
                       }`}
                     >
@@ -133,18 +132,18 @@ export default async function MenuIndexPage() {
                           />
                         </svg>
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                     </div>
                   )}
 
-                  {/* Category number badge */}
+                 
                   <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center border border-white/50 z-10">
                     <span className="text-white font-bold text-sm">
                       {idx + 1}
                     </span>
                   </div>
 
-                  {/* Category name */}
+                 
                   <div className="absolute inset-0 flex items-end p-3 z-10">
                     <div className="text-white font-semibold text-sm drop-shadow-lg">
                       {cat.name}
@@ -157,7 +156,7 @@ export default async function MenuIndexPage() {
         </div>
       </section>
 
-      {/* Featured */}
+    
       <section>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-2xl font-semibold">Featured</h3>

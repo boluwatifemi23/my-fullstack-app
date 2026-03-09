@@ -1,10 +1,8 @@
-// app/menu/error.tsx
 'use client';
 
 import Link from "next/link";
 
 export default function MenuError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };

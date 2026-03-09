@@ -25,9 +25,7 @@ export default function MenuSectionClient() {
       const meals = await mealsRes.json();
       if (!mounted) return;
       setCategories(cats);
-      // featured: most recent 6
       setFeatured(meals.slice(0, 6));
-      // specials: choose a handful to rotate
       setSpecials(meals.slice(2, 12));
       setLoading(false);
     }

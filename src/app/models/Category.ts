@@ -1,4 +1,4 @@
-// app/models/Category.ts
+
 import { Schema, model, models } from "mongoose";
 
 export interface CategoryType {

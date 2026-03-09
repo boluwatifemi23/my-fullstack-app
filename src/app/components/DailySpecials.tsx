@@ -4,14 +4,13 @@ import MealCardClient from "./MealCardClient";
 import { MealType } from "@/app/models/Meal";
 
 export default function DailySpecials({ meals }: { meals: MealType[] }) {
-  // Choose daily index by date: rotate list each day
   const [index, setIndex] = useState(() => {
     const today = new Date();
     return today.getDate() % Math.max(1, meals.length);
   });
 
-  // auto rotate every 6s for visual effect
   useEffect(() => {
+    if (meals.length === 0) return;
     const t = setInterval(() => {
       setIndex((i) => (i + 1) % meals.length);
     }, 6000);
@@ -20,7 +19,6 @@ export default function DailySpecials({ meals }: { meals: MealType[] }) {
 
   if (!meals || meals.length === 0) return null;
 
-  // show 3 items centered
   const windowItems = [
     meals[index],
     meals[(index + 1) % meals.length],
@@ -34,8 +32,7 @@ export default function DailySpecials({ meals }: { meals: MealType[] }) {
         {windowItems.map((m) => (
           <div
             key={m._id}
-            className="w-64 transform transition duration-500 hover:scale-105"
-            style={{ willChange: "transform" }}
+            className="w-64 transition duration-500 hover:scale-105 will-change-transform"
           >
             <MealCardClient meal={m} compact />
           </div>

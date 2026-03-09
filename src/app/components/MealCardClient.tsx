@@ -20,7 +20,7 @@ export default function MealCardClient({
     try {
       addToCart(meal);
       toast.success(`${meal.name} added to cart`);
-    } catch (err) {
+    } catch {
       toast.error("Failed to add to cart");
     } finally {
       setAdding(false);

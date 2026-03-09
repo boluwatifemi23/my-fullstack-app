@@ -1,4 +1,4 @@
-// app/utils/mongoose-types.ts
+
 import { Types } from "mongoose";
 
 export interface LeanCategoryDoc {

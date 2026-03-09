@@ -3,7 +3,7 @@
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 
-// Extend Next.js ImageProps so TS knows about "src", "alt", "className", etc.
+
 type ImageWithFallbackProps = ImageProps & {
   fallbackSrc?: string;
 };
@@ -11,7 +11,7 @@ type ImageWithFallbackProps = ImageProps & {
 export default function ImageWithFallback({
   src,
   alt,
-  fallbackSrc = "/images/fishpie.jpg",
+  fallbackSrc = "/images/fishpie.webp",
   ...props
 }: ImageWithFallbackProps) {
   const [imgSrc, setImgSrc] = useState(src);

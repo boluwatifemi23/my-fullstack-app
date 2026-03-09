@@ -1,15 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@/app/lib/dbConnect";
-import Meal from "@/app/models/Meal";
+import Category from "@/app/models/Category";
 import { verifyToken } from "@/app/lib/auth";
-
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  await connectDB();
-  const meal = await Meal.findById(id).lean();
-  if (!meal) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(meal);
-}
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -21,11 +13,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     await connectDB();
     const body = await req.json();
-    const meal = await Meal.findByIdAndUpdate(id, body, { new: true });
-    if (!meal) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(meal);
+    const category = await Category.findByIdAndUpdate(id, body, { new: true });
+    if (!category) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(category);
   } catch {
-    return NextResponse.json({ error: "Failed to update meal" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update category" }, { status: 500 });
   }
 }
 
@@ -38,10 +30,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!decoded || decoded.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     await connectDB();
-    const meal = await Meal.findByIdAndDelete(id);
-    if (!meal) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const category = await Category.findByIdAndDelete(id);
+    if (!category) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ error: "Failed to delete meal" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete category" }, { status: 500 });
   }
 }

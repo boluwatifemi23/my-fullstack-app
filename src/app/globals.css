@@ -31,3 +31,8 @@ body {
 }
 .animate-scroll-left { animation: scroll-left 22s linear infinite; }
 
+.will-change-transform {
+  will-change: transform;
+  
+}
+

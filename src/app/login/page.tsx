@@ -16,7 +16,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#110803] via-[#2d1203] to-[#f59e0b]
+    <div className="min-h-screen bg-linear-to-br from-[#110803] via-[#2d1203] to-[#f59e0b]
         flex items-center justify-center px-4 relative overflow-hidden">
       
      
@@ -71,7 +71,7 @@ export default function LoginPage() {
             whileTap={{ scale: 0.96 }}
             whileHover={{ scale: 1.02 }}
             className="w-full py-3 rounded-xl text-white font-semibold
-              bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-400
+              bg-linear-to-r from-orange-600 via-amber-500 to-yellow-400
               shadow-[0_0_20px_#f59e0b50] hover:shadow-[0_0_40px_#f59e0b80]
               transition"
           >

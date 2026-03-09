@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-// Rotating phrases under the heading
+
 const PHRASES = [
   "Fresh meals.",
   "Authentic Nigerian flavors.",
@@ -12,7 +12,7 @@ const PHRASES = [
   "Party catering for every occasion.",
 ];
 
-// Rotating hero background images
+
 const BG_IMAGES = [
   "/images/assorted-meat.png",
   "/images/fishpie.webp",
@@ -25,7 +25,7 @@ export default function Hero() {
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [bgIdx, setBgIdx] = useState(0);
 
-  // Rotate phrases
+  
   useEffect(() => {
     const t = setInterval(
       () => setPhraseIdx((i) => (i + 1) % PHRASES.length),
@@ -34,7 +34,7 @@ export default function Hero() {
     return () => clearInterval(t);
   }, []);
 
-  // Rotate background images
+  
   useEffect(() => {
     const t = setInterval(
       () => setBgIdx((i) => (i + 1) % BG_IMAGES.length),
@@ -43,7 +43,7 @@ export default function Hero() {
     return () => clearInterval(t);
   }, []);
 
-  // Smooth scroll to menu section
+ 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -53,7 +53,7 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden h-screen">
-      {/* Background Layer */}
+      
       <div className="absolute inset-0">
         {BG_IMAGES.map((src, idx) => (
           <Image
@@ -67,11 +67,11 @@ export default function Hero() {
           />
         ))}
 
-        {/* Dark overlay */}
+       
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
-      {/* Content */}
+      
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-28 lg:py-36 flex flex-col lg:flex-row items-center gap-12 text-center lg:text-left text-white">
         <div className="lg:w-6/12">
           <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight drop-shadow-md">
@@ -87,9 +87,9 @@ export default function Hero() {
             events, corporate functions, and celebrations.
           </p>
 
-          {/* Buttons */}
+         
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            {/* Smooth scroll button */}
+           
             <button
               type="button"
               onClick={() => scrollToSection("menu-section")}
@@ -106,7 +106,7 @@ export default function Hero() {
             </Link>
           </div>
 
-          {/* Chef section */}
+          
           <div className="mt-8 inline-flex items-center gap-4 justify-center lg:justify-start">
             <Image
               src="/images/chef.jpg"

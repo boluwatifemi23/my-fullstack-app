@@ -18,10 +18,10 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#110803] via-[#2d1203] to-[#f59e0b]
+    <div className="min-h-screen bg-linear-to-br from-[#110803] via-[#2d1203] to-[#f59e0b]
         flex items-center justify-center px-4 relative overflow-hidden">
       
-      {/* Animated gold glow */}
+     
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 0.25, scale: 1.4 }}
@@ -103,7 +103,7 @@ export default function SignupPage() {
             whileTap={{ scale: 0.96 }}
             whileHover={{ scale: 1.02 }}
             className="w-full py-3 rounded-xl text-white font-semibold
-              bg-gradient-to-r from-amber-600 via-yellow-500 to-orange-500
+              bg-linear-to-r from-amber-600 via-yellow-500 to-orange-500
               shadow-[0_0_20px_#fbbf2480] hover:shadow-[0_0_40px_#fbbf24bb]
               transition"
           >
