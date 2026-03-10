@@ -4,31 +4,25 @@ import { useCart } from "@/app/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, ShoppingBag, ArrowLeft, Plus, Minus } from "lucide-react";
-import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CartPage() {
-  const { items, clear, addToCart } = useCart();
-  const [removing, setRemoving] = useState<string | null>(null);
-
-  
-  const removeItem = (id: string) => {
-    
-    setRemoving(id);
-    setTimeout(() => setRemoving(null), 300);
-  };
-
+  const { items, clear, addToCart, removeFromCart, decreaseQuantity } = useCart();
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <div className="w-24 h-24 mx-auto mb-6 bg-orange-100 rounded-full flex items-center justify-center">
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 relative overflow-hidden">
+      
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+
+        <div className="relative text-center max-w-sm">
+          <div className="w-24 h-24 mx-auto mb-6 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
             <ShoppingBag size={40} className="text-orange-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h1>
-          <p className="text-gray-500 mb-6">Looks like you haven&apos;t added any meals yet.</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Your cart is empty</h1>
+          <p className="text-gray-400 mb-6">Looks like you haven&apos;t added any meals yet.</p>
           <Link href="/"
             className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium transition-all">
             <ArrowLeft size={18} /> Browse Menu
@@ -39,27 +33,33 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-10">
-        
+    <div className="min-h-screen bg-gray-950 relative overflow-hidden">
+    
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+        <div className="absolute top-20 -left-20 w-96 h-96 bg-orange-500/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 right-0 w-80 h-80 bg-amber-500/8 rounded-full blur-3xl animate-pulse delay-700" />
+        <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-orange-600/8 rounded-full blur-3xl animate-pulse delay-1500" />
+      </div>
+
+      <div className="relative max-w-4xl mx-auto px-4 py-10">
+       
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/" className="text-gray-500 hover:text-orange-500 transition">
-            <ArrowLeft size={20} />
+          <Link href="/" className="text-gray-400 hover:text-orange-500 transition p-2 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10">
+            <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Your Cart</h1>
-            <p className="text-gray-500 text-sm">{items.reduce((s, i) => s + i.quantity, 0)} items</p>
+            <h1 className="text-2xl font-bold text-white">Your Cart</h1>
+            <p className="text-gray-400 text-sm">{items.reduce((s, i) => s + i.quantity, 0)} items</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
          
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-3">
             {items.map((item) => (
               <div key={item._id}
-                className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-4 transition-all
-                  ${removing === item._id ? "opacity-0 scale-95" : "opacity-100"}`}>
-                <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-4 flex gap-4 hover:bg-white/8 transition-all duration-200">
+                <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-gray-800 border border-white/10">
                   {item.image ? (
                     <Image src={item.image} alt={item.name} width={80} height={80} className="object-cover w-full h-full" />
                   ) : (
@@ -68,27 +68,31 @@ export default function CartPage() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-                  <p className="text-sm text-gray-500 capitalize">{item.category.replace(/-/g, " ")}</p>
-                  <p className="text-orange-600 font-bold mt-1">${item.price.toLocaleString()}</p>
+                  <h3 className="font-semibold text-white truncate">{item.name}</h3>
+                  <p className="text-sm text-gray-400 capitalize">{item.category.replace(/-/g, " ")}</p>
+                  <p className="text-orange-400 font-bold mt-1">${item.price.toLocaleString()}</p>
                 </div>
 
                 <div className="flex flex-col items-end justify-between">
                   <button
-                  title="Remove from cart"
-                   onClick={() => { removeItem(item._id); toast.success(`${item.name} removed`); }}
-                    className="text-gray-400 hover:text-red-500 transition p-1">
-                    <Trash2 size={16} />
+                     title="Remove item"
+                    onClick={() => { removeFromCart(item._id); toast.success(`${item.name} removed`); }}
+                    className="text-gray-500 hover:text-red-400 transition p-1 rounded-lg hover:bg-red-400/10">
+                    <Trash2 size={15} />
                   </button>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-400">
-                      <Minus size={14} />
-                    </span>
-                    <span className="w-6 text-center font-semibold text-gray-900">{item.quantity}</span>
+                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
                     <button
-                    title="Add to cart"
-                     onClick={() => addToCart(item)} className="text-orange-500 hover:text-orange-600 transition">
-                      <Plus size={14} />
+                    title="Decrease quantity"
+                     onClick={() => decreaseQuantity(item._id)}
+                      className="text-gray-400 hover:text-orange-400 transition">
+                      <Minus size={13} />
+                    </button>
+                    <span className="w-6 text-center font-bold text-white text-sm">{item.quantity}</span>
+                    <button
+                     title="Add"
+                     onClick={() => addToCart(item)}
+                      className="text-gray-400 hover:text-orange-400 transition">
+                      <Plus size={13} />
                     </button>
                   </div>
                 </div>
@@ -96,40 +100,39 @@ export default function CartPage() {
             ))}
 
             <button onClick={() => { clear(); toast.success("Cart cleared"); }}
-              className="text-sm text-red-400 hover:text-red-500 transition flex items-center gap-1">
-              <Trash2 size={14} /> Clear cart
+              className="text-sm text-red-400 hover:text-red-300 transition flex items-center gap-1.5 mt-2 px-3 py-2 rounded-xl hover:bg-red-400/10">
+              <Trash2 size={13} /> Clear cart
             </button>
           </div>
 
          
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
-              <h2 className="font-bold text-gray-900 text-lg mb-4">Order Summary</h2>
+            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sticky top-24">
+              <h2 className="font-bold text-white text-lg mb-4">Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
                 {items.map((item) => (
-                  <div key={item._id} className="flex justify-between text-gray-600">
-                    <span>{item.name} × {item.quantity}</span>
-                    <span>${(item.price * item.quantity).toLocaleString()}</span>
+                  <div key={item._id} className="flex justify-between text-gray-400">
+                    <span className="truncate mr-2">{item.name} × {item.quantity}</span>
+                    <span className="text-white font-medium shrink-0">${(item.price * item.quantity).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t pt-4 mb-6">
-                <div className="flex justify-between font-bold text-gray-900">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toLocaleString()}</span>
+              <div className="border-t border-white/10 pt-4 mb-6">
+                <div className="flex justify-between font-bold">
+                  <span className="text-white">Subtotal</span>
+                  <span className="text-orange-400 text-lg">${subtotal.toLocaleString()}</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Delivery fees calculated at checkout</p>
+                <p className="text-xs text-gray-500 mt-1">Delivery fees calculated at checkout</p>
               </div>
 
               <button
                 onClick={() => toast("Checkout coming soon! 🚀", { icon: "ℹ️" })}
-                className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all shadow-lg shadow-orange-500/30"
-              >
+                className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all shadow-lg shadow-orange-500/20 active:scale-95">
                 Proceed to Checkout
               </button>
 
               <Link href="/"
-                className="block text-center text-sm text-gray-500 hover:text-orange-500 mt-3 transition">
+                className="block text-center text-sm text-gray-500 hover:text-orange-400 mt-3 transition">
                 ← Continue Shopping
               </Link>
             </div>

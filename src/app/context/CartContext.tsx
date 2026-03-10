@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
@@ -21,6 +20,8 @@ type CartContextShape = {
   remove: (n?: number) => void;
   clear: () => void;
   addToCart: (meal: Meal) => void;
+  removeFromCart: (id: string) => void;
+  decreaseQuantity: (id: string) => void;
 };
 
 const CartContext = createContext<CartContextShape | undefined>(undefined);
@@ -31,6 +32,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const add = (n = 1) => setCount((c) => Math.max(0, c + n));
   const remove = (n = 1) => setCount((c) => Math.max(0, c - n));
+
   const clear = () => {
     setCount(0);
     setItems([]);
@@ -41,9 +43,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const existing = prev.find((item) => item._id === meal._id);
       if (existing) {
         return prev.map((item) =>
-          item._id === meal._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+          item._id === meal._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
       return [...prev, { ...meal, quantity: 1 }];
@@ -51,8 +51,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCount((c) => c + 1);
   };
 
+  const removeFromCart = (id: string) => {
+    setItems((prev) => {
+      const item = prev.find((i) => i._id === id);
+      if (item) setCount((c) => Math.max(0, c - item.quantity));
+      return prev.filter((i) => i._id !== id);
+    });
+  };
+
+  const decreaseQuantity = (id: string) => {
+    setItems((prev) => {
+      const item = prev.find((i) => i._id === id);
+      if (!item) return prev;
+      if (item.quantity === 1) {
+        setCount((c) => Math.max(0, c - 1));
+        return prev.filter((i) => i._id !== id);
+      }
+      setCount((c) => Math.max(0, c - 1));
+      return prev.map((i) => i._id === id ? { ...i, quantity: i.quantity - 1 } : i);
+    });
+  };
+
   return (
-    <CartContext.Provider value={{ count, items, add, remove, clear, addToCart }}>
+    <CartContext.Provider value={{ count, items, add, remove, clear, addToCart, removeFromCart, decreaseQuantity }}>
       {children}
     </CartContext.Provider>
   );

@@ -3,7 +3,7 @@
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { User, Mail, Shield, LogOut } from "lucide-react";
+import { User, Mail, Shield, LogOut, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function ProfilePage() {
@@ -16,8 +16,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -25,56 +25,63 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-lg mx-auto">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        
-          <div className="bg-linear-to-r from-orange-500 to-amber-500 px-6 py-10 text-center">
-            <div className="w-20 h-20 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-3 border-2 border-white/50">
-              <span className="text-3xl font-bold text-white">{user.firstName[0]}{user.lastName[0]}</span>
+    <div className="min-h-screen bg-gray-950 py-12 px-4 relative overflow-hidden">
+   
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-10 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-amber-600/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-0 w-64 h-64 bg-orange-700/8 rounded-full blur-3xl animate-pulse delay-500" />
+      </div>
+
+      <div className="relative max-w-lg mx-auto">
+        <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+
+         
+          <div className="relative px-6 py-10 text-center overflow-hidden">
+            
+            <div className="absolute inset-0 bg-linear-to-br from-orange-500/30 via-amber-500/20 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-gray-950/60 to-transparent" />
+
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border border-white/20 shadow-xl">
+                <span className="text-3xl font-bold text-white">{user.firstName[0]}{user.lastName[0]}</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white">{user.firstName} {user.lastName}</h1>
+              <span className="inline-block mt-2 px-3 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full text-orange-300 text-xs font-semibold capitalize">
+                {user.role}
+              </span>
             </div>
-            <h1 className="text-2xl font-bold text-white">{user.firstName} {user.lastName}</h1>
-            <p className="text-orange-100 text-sm mt-1 capitalize">{user.role}</p>
           </div>
 
-          
-          <div className="p-6 space-y-4">
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-              <User size={18} className="text-orange-500" />
-              <div>
-                <p className="text-xs text-gray-500">Full Name</p>
-                <p className="text-gray-900 font-medium">{user.firstName} {user.lastName}</p>
+          <div className="p-6 space-y-3">
+            {[
+              { icon: User, label: "Full Name", value: `${user.firstName} ${user.lastName}` },
+              { icon: Mail, label: "Email Address", value: user.email },
+              { icon: Shield, label: "Account Role", value: user.role },
+            ].map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-center gap-3 p-4 bg-white/5 hover:bg-white/8 rounded-2xl border border-white/8 transition-all group">
+                <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0">
+                  <Icon size={16} className="text-orange-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500">{label}</p>
+                  <p className="text-white font-medium capitalize truncate">{value}</p>
+                </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-              <Mail size={18} className="text-orange-500" />
-              <div>
-                <p className="text-xs text-gray-500">Email Address</p>
-                <p className="text-gray-900 font-medium">{user.email}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-              <Shield size={18} className="text-orange-500" />
-              <div>
-                <p className="text-xs text-gray-500">Account Role</p>
-                <p className="text-gray-900 font-medium capitalize">{user.role}</p>
-              </div>
-            </div>
+            ))}
 
             {user.role === "admin" && (
               <Link href="/admin"
-                className="flex items-center justify-center gap-2 w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium text-sm transition-all">
-                Go to Admin Panel →
+                className="flex items-center justify-between w-full p-4 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 hover:border-orange-500/40 text-orange-400 rounded-2xl font-medium text-sm transition-all group">
+                <span>Go to Admin Panel</span>
+                <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
 
             <button
               onClick={logout}
-              className="flex items-center justify-center gap-2 w-full py-3 border border-red-200 text-red-500 hover:bg-red-50 rounded-xl font-medium text-sm transition-all"
-            >
-              <LogOut size={16} /> Logout
+              className="flex items-center justify-center gap-2 w-full py-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 hover:text-red-300 rounded-2xl font-medium text-sm transition-all">
+              <LogOut size={15} /> Logout
             </button>
           </div>
         </div>

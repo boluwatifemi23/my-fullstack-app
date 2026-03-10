@@ -1,24 +1,50 @@
 "use client";
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
-type Cat = { _id: string; name: string; slug: string };
+type Cat = { _id: string; name: string; slug: string; image?: string };
 
 export default function CategoriesCarousel({ categories }: { categories: Cat[] }) {
   const items = [...categories, ...categories];
 
   return (
-    <div className="w-full overflow-hidden">
-      <div className="flex gap-6 py-4 animate-scroll-left will-change-transform">
+    <div className="w-full overflow-hidden relative">
+   
+      <div className="absolute left-0 top-0 bottom-0 w-16 bg-linear-to-r from-black to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-black to-transparent z-10 pointer-events-none" />
+
+      <div className="flex gap-5 py-4 animate-scroll-left will-change-transform">
         {items.map((cat, i) => (
-          <div
+          <Link
             key={`${cat.slug}-${i}`}
-            className="shrink-0 w-64 md:w-72 lg:w-80 rounded-3xl bg-linear-to-b from-[#2a0a00] to-[#6b2b00] text-white shadow-xl overflow-hidden hover:scale-105 transition-transform"
+            href={`/menu/${cat.slug}`}
+            className="group shrink-0 relative w-52 h-36 rounded-2xl overflow-hidden shadow-xl hover:shadow-orange-500/20 transition-all duration-300 hover:-translate-y-1 border border-white/10"
           >
-            <Link href={`/menu/${cat.slug}`} className="h-40 flex items-end p-4">
-              <span className="text-lg font-bold">{cat.name}</span>
-            </Link>
-          </div>
+          
+            <div className="absolute inset-0 bg-linear-to-br from-orange-900 to-amber-800" />
+
+           
+            {cat.image ? (
+              <Image
+                src={cat.image}
+                alt={cat.name}
+                fill
+                className="object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
+                sizes="208px"
+              />
+            ) : null}
+
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+
+            <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-orange-500/80 backdrop-blur-sm flex items-center justify-center text-white text-xs font-bold border border-white/20">
+              {(i % categories.length) + 1}
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <p className="text-white font-bold text-sm leading-tight">{cat.name}</p>
+            </div>
+          </Link>
         ))}
       </div>
     </div>
