@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { Pencil, Trash2, Plus, X, Search } from "lucide-react";
+import ConfirmModal from "../components/ConfirmModal";
 
 type Category = { _id: string; name: string; slug: string };
 type Meal = {
@@ -17,6 +18,13 @@ type Meal = {
 
 const emptyForm = { name: "", price: "", category: "", image: "", description: "" };
 
+type ConfirmState = {
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+};
+
 export default function AdminMeals() {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -27,6 +35,9 @@ export default function AdminMeals() {
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmState>({
+    open: false, title: "", message: "", onConfirm: () => {},
+  });
 
   useEffect(() => { loadData(); }, []);
 
@@ -99,22 +110,29 @@ export default function AdminMeals() {
     }
   }
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    try {
-      const res = await fetch(`/api/meals/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (res.ok) {
-        toast.success("Meal deleted");
-        setMeals((prev) => prev.filter((m) => m._id !== id));
-      } else {
-        toast.error("Failed to delete");
-      }
-    } catch {
-      toast.error("Something went wrong");
-    }
+  function handleDelete(id: string, name: string) {
+    setConfirmModal({
+      open: true,
+      title: "Delete Meal",
+      message: `Are you sure you want to delete "${name}"? This cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+        try {
+          const res = await fetch(`/api/meals/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+          if (res.ok) {
+            toast.success("Meal deleted");
+            setMeals((prev) => prev.filter((m) => m._id !== id));
+          } else {
+            toast.error("Failed to delete");
+          }
+        } catch {
+          toast.error("Something went wrong");
+        }
+      },
+    });
   }
 
   function openEdit(meal: Meal) {
@@ -166,9 +184,7 @@ export default function AdminMeals() {
           <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <h2 className="text-white font-semibold text-lg">{editingId ? "Edit Meal" : "Add New Meal"}</h2>
-              <button
-              title="o"
-               onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
+              <button title="Close" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
                 className="text-gray-400 hover:text-white transition">
                 <X size={20} />
               </button>
@@ -190,9 +206,7 @@ export default function AdminMeals() {
               </div>
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Category *</label>
-                <select
-                  title="Category"
-                 required value={form.category}
+                <select title="Category" required value={form.category}
                   onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
                   className="w-full px-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500/50">
                   <option value="">Select a category</option>
@@ -210,9 +224,7 @@ export default function AdminMeals() {
               </div>
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Image</label>
-                <input
-                title="o"
-                 type="file" accept="image/*" onChange={handleImageUpload}
+                <input title="Upload image" type="file" accept="image/*" onChange={handleImageUpload}
                   className="w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-500/20 file:text-orange-400 file:cursor-pointer hover:file:bg-orange-500/30 cursor-pointer" />
                 {uploading && <p className="text-orange-400 text-xs mt-1 animate-pulse">Uploading...</p>}
                 {form.image && (
@@ -286,16 +298,11 @@ export default function AdminMeals() {
                   <td className="px-4 py-3 text-white font-semibold">₦{meal.price.toLocaleString()}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => openEdit(meal)}
-                        className="p-1.5 text-gray-400 hover:text-orange-400 hover:bg-orange-400/10 rounded-lg transition"
-                        title="Edit Meal"
-                      >
+                      <button onClick={() => openEdit(meal)} title="Edit Meal"
+                        className="p-1.5 text-gray-400 hover:text-orange-400 hover:bg-orange-400/10 rounded-lg transition">
                         <Pencil size={15} />
                       </button>
-                      <button
-                          title="Delete Meal"
-                       onClick={() => handleDelete(meal._id, meal.name)}
+                      <button onClick={() => handleDelete(meal._id, meal.name)} title="Delete Meal"
                         className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition">
                         <Trash2 size={15} />
                       </button>
@@ -307,6 +314,16 @@ export default function AdminMeals() {
           </table>
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel="Delete"
+        danger
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+      />
     </div>
   );
 }

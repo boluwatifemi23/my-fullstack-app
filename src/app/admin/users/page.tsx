@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Shield, ShieldOff, Trash2, Search, Users } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
+import ConfirmModal from "@/app/admin/components/ConfirmModal";
 
 type User = {
   _id: string;
@@ -14,21 +15,31 @@ type User = {
   createdAt: string;
 };
 
+type ConfirmState = {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmLabel: string;
+  danger: boolean;
+  onConfirm: () => void;
+};
+
 export default function AdminUsers() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmState>({
+    open: false, title: "", message: "", confirmLabel: "Confirm", danger: false, onConfirm: () => {},
+  });
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  useEffect(() => { loadUsers(); }, []);
 
   async function loadUsers() {
     setLoading(true);
     try {
-      const res = await fetch("/api/users");
+      const res = await fetch("/api/users", { credentials: "include" });
       const data = await res.json();
       setUsers(data);
     } catch {
@@ -38,62 +49,65 @@ export default function AdminUsers() {
     }
   }
 
-  async function toggleRole(user: User) {
+  function toggleRole(user: User) {
     const newRole = user.role === "admin" ? "user" : "admin";
-    const action = newRole === "admin" ? "make admin" : "demote to user";
-
-    if (!confirm(`Are you sure you want to ${action} ${user.firstName} ${user.lastName}?`)) return;
-
-    setUpdating(user._id);
-    try {
-      const res = await fetch(`/api/users/${user._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Failed to update role");
-        return;
-      }
-
-      setUsers((prev) =>
-        prev.map((u) => (u._id === user._id ? { ...u, role: newRole } : u))
-      );
-      toast.success(
-        newRole === "admin"
-          ? `${user.firstName} is now an Admin!`
-          : `${user.firstName} has been demoted to User`
-      );
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setUpdating(null);
-    }
+    setConfirmModal({
+      open: true,
+      title: newRole === "admin" ? "Make Admin" : "Demote User",
+      message: newRole === "admin"
+        ? `Give ${user.firstName} ${user.lastName} admin access?`
+        : `Remove admin access from ${user.firstName} ${user.lastName}?`,
+      confirmLabel: newRole === "admin" ? "Make Admin" : "Demote",
+      danger: newRole === "user",
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+        setUpdating(user._id);
+        try {
+          const res = await fetch(`/api/users/${user._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ role: newRole }),
+          });
+          const data = await res.json();
+          if (!res.ok) { toast.error(data.error || "Failed to update role"); return; }
+          setUsers((prev) => prev.map((u) => (u._id === user._id ? { ...u, role: newRole } : u)));
+          toast.success(newRole === "admin" ? `${user.firstName} is now an Admin!` : `${user.firstName} has been demoted`);
+        } catch {
+          toast.error("Something went wrong");
+        } finally {
+          setUpdating(null);
+        }
+      },
+    });
   }
 
-  async function deleteUser(user: User) {
-    if (!confirm(`Delete ${user.firstName} ${user.lastName}? This cannot be undone.`)) return;
-
-    setUpdating(user._id);
-    try {
-      const res = await fetch(`/api/users/${user._id}`, { method: "DELETE" });
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Failed to delete user");
-        return;
-      }
-
-      setUsers((prev) => prev.filter((u) => u._id !== user._id));
-      toast.success("User deleted");
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setUpdating(null);
-    }
+  function deleteUser(user: User) {
+    setConfirmModal({
+      open: true,
+      title: "Delete User",
+      message: `Permanently delete ${user.firstName} ${user.lastName}? This cannot be undone.`,
+      confirmLabel: "Delete",
+      danger: true,
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+        setUpdating(user._id);
+        try {
+          const res = await fetch(`/api/users/${user._id}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+          const data = await res.json();
+          if (!res.ok) { toast.error(data.error || "Failed to delete user"); return; }
+          setUsers((prev) => prev.filter((u) => u._id !== user._id));
+          toast.success("User deleted");
+        } catch {
+          toast.error("Something went wrong");
+        } finally {
+          setUpdating(null);
+        }
+      },
+    });
   }
 
   const filtered = users.filter(
@@ -108,7 +122,6 @@ export default function AdminUsers() {
 
   return (
     <div>
-      
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Users</h1>
@@ -128,18 +141,13 @@ export default function AdminUsers() {
         </div>
       </div>
 
-     
       <div className="relative mb-6">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+        <input value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, email or role..."
-          className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50"
-        />
+          className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
       </div>
 
-     
       {loading ? (
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
@@ -149,9 +157,7 @@ export default function AdminUsers() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <Users size={40} className="text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-500">
-            {search ? "No users match your search." : "No users found."}
-          </p>
+          <p className="text-gray-500">{search ? "No users match your search." : "No users found."}</p>
         </div>
       ) : (
         <div className="bg-gray-800 border border-white/10 rounded-2xl overflow-hidden">
@@ -169,7 +175,6 @@ export default function AdminUsers() {
               {filtered.map((user) => {
                 const isCurrentUser = currentUser?.id === user._id;
                 const isUpdating = updating === user._id;
-
                 return (
                   <tr key={user._id} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3">
@@ -180,75 +185,46 @@ export default function AdminUsers() {
                         <div>
                           <p className="text-white font-medium">
                             {user.firstName} {user.lastName}
-                            {isCurrentUser && (
-                              <span className="ml-2 text-xs text-orange-400 font-normal">(you)</span>
-                            )}
+                            {isCurrentUser && <span className="ml-2 text-xs text-orange-400 font-normal">(you)</span>}
                           </p>
                           <p className="text-gray-500 text-xs md:hidden">{user.email}</p>
                         </div>
                       </div>
                     </td>
-
                     <td className="px-4 py-3 hidden md:table-cell">
                       <span className="text-gray-400">{user.email}</span>
                     </td>
-
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
                         ${user.role === "admin"
                           ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-                          : "bg-white/5 text-gray-400 border border-white/10"
-                        }`}>
+                          : "bg-white/5 text-gray-400 border border-white/10"}`}>
                         {user.role === "admin" ? <Shield size={11} /> : <ShieldOff size={11} />}
                         {user.role === "admin" ? "Admin" : "Customer"}
                       </span>
                     </td>
-
                     <td className="px-4 py-3 hidden sm:table-cell">
                       <span className="text-gray-500 text-xs">
-                        {new Date(user.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                        {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </span>
                     </td>
-
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
-                       
-                        <button
-                          onClick={() => toggleRole(user)}
+                        <button onClick={() => toggleRole(user)}
                           disabled={isUpdating || isCurrentUser}
-                          title={
-                            isCurrentUser
-                              ? "You cannot change your own role"
-                              : user.role === "admin"
-                              ? "Demote to Customer"
-                              : "Make Admin"
-                          }
+                          title={isCurrentUser ? "You cannot change your own role" : user.role === "admin" ? "Demote to Customer" : "Make Admin"}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed
                             ${user.role === "admin"
                               ? "bg-gray-700 text-gray-300 hover:bg-red-500/20 hover:text-red-400"
-                              : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"
-                            }`}
-                        >
-                          {isUpdating ? (
-                            <span className="animate-pulse">...</span>
-                          ) : user.role === "admin" ? (
-                            <><ShieldOff size={12} /> Demote</>
-                          ) : (
-                            <><Shield size={12} /> Make Admin</>
-                          )}
+                              : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"}`}>
+                          {isUpdating ? <span className="animate-pulse">...</span>
+                            : user.role === "admin" ? <><ShieldOff size={12} /> Demote</>
+                            : <><Shield size={12} /> Make Admin</>}
                         </button>
-
-                       
-                        <button
-                          onClick={() => deleteUser(user)}
+                        <button onClick={() => deleteUser(user)}
                           disabled={isUpdating || isCurrentUser}
                           title={isCurrentUser ? "You cannot delete yourself" : "Delete user"}
-                          className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
+                          className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -260,6 +236,16 @@ export default function AdminUsers() {
           </table>
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        danger={confirmModal.danger}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+      />
     </div>
   );
 }

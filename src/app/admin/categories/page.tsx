@@ -4,9 +4,17 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { Pencil, Trash2, Plus, X } from "lucide-react";
+import ConfirmModal from "../components/ConfirmModal";
 
 type Category = { _id: string; name: string; slug: string; image?: string };
 const emptyForm = { name: "", slug: "", image: "" };
+
+type ConfirmState = {
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+};
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -16,6 +24,9 @@ export default function AdminCategories() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<ConfirmState>({
+    open: false, title: "", message: "", onConfirm: () => {},
+  });
 
   useEffect(() => { loadCategories(); }, []);
 
@@ -38,7 +49,11 @@ export default function AdminCategories() {
     try {
       const data = new FormData();
       data.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: data });
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        credentials: "include",
+        body: data,
+      });
       const result = await res.json();
       if (result.url) { setForm((f) => ({ ...f, image: result.url })); toast.success("Image uploaded!"); }
       else toast.error("Upload failed");
@@ -55,6 +70,7 @@ export default function AdminCategories() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(form),
       });
       if (!res.ok) { const err = await res.json(); toast.error(err.error || "Failed to save"); return; }
@@ -65,13 +81,27 @@ export default function AdminCategories() {
     finally { setSaving(false); }
   }
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    try {
-      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
-      if (res.ok) { toast.success("Category deleted"); setCategories((prev) => prev.filter((c) => c._id !== id)); }
-      else toast.error("Failed to delete");
-    } catch { toast.error("Something went wrong"); }
+  function handleDelete(id: string, name: string) {
+    setConfirmModal({
+      open: true,
+      title: "Delete Category",
+      message: `Are you sure you want to delete "${name}"? This cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+        try {
+          const res = await fetch(`/api/categories/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+          if (res.ok) {
+            toast.success("Category deleted");
+            setCategories((prev) => prev.filter((c) => c._id !== id));
+          } else {
+            toast.error("Failed to delete");
+          }
+        } catch { toast.error("Something went wrong"); }
+      },
+    });
   }
 
   function openEdit(cat: Category) {
@@ -93,15 +123,13 @@ export default function AdminCategories() {
         </button>
       </div>
 
-      
       {showForm && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md">
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <h2 className="text-white font-semibold text-lg">{editingId ? "Edit Category" : "Add Category"}</h2>
-              <button
-              title="o"
-               onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }} className="text-gray-400 hover:text-white">
+              <button title="Close" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
+                className="text-gray-400 hover:text-white">
                 <X size={20} />
               </button>
             </div>
@@ -123,9 +151,7 @@ export default function AdminCategories() {
               </div>
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Image</label>
-                <input
-                title="o"
-                 type="file" accept="image/*" onChange={handleImageUpload}
+                <input title="Upload image" type="file" accept="image/*" onChange={handleImageUpload}
                   className="w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-500/20 file:text-orange-400 file:cursor-pointer hover:file:bg-orange-500/30" />
                 {uploading && <p className="text-orange-400 text-xs mt-1 animate-pulse">Uploading...</p>}
                 {form.image && (
@@ -149,7 +175,6 @@ export default function AdminCategories() {
         </div>
       )}
 
-      
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => <div key={i} className="h-32 bg-gray-800 rounded-2xl animate-pulse" />)}
@@ -185,6 +210,16 @@ export default function AdminCategories() {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel="Delete"
+        danger
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, open: false }))}
+      />
     </div>
   );
 }
