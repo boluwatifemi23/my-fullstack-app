@@ -3,7 +3,7 @@
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { User, Mail, Shield, LogOut, ChevronRight } from "lucide-react";
+import { User, Mail, Shield, LogOut, ChevronRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
 export default function ProfilePage() {
@@ -67,6 +67,14 @@ export default function ProfilePage() {
                 </div>
               </div>
             ))}
+
+            <Link href="/my-orders"
+  className="flex items-center justify-between w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 rounded-2xl font-medium text-sm transition-all group">
+  <span className="flex items-center gap-2">
+    <ShoppingBag size={15} className="text-orange-400" /> My Orders
+  </span>
+  <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+</Link>
 
             {user.role === "admin" && (
               <Link href="/admin"

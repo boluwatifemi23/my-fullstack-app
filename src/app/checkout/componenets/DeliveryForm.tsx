@@ -2,15 +2,26 @@
 
 import { useState } from "react";
 import { CustomerInfo } from "../page";
-import { MapPin, User, Phone, Mail, Calendar, Clock, FileText } from "lucide-react";
+import { MapPin, User, Clock } from "lucide-react";
 
-const US_STATES = [
-  "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA",
-  "KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
-  "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT",
-  "VA","WA","WV","WI","WY",
-];
+const STATE_CITIES: Record<string, string[]> = {
+  IL: [
+    "Chicago", "Aurora", "Naperville", "Joliet", "Rockford", "Springfield",
+    "Elgin", "Peoria", "Champaign", "Waukegan", "Cicero", "Evanston",
+    "Schaumburg", "Bolingbrook", "Arlington Heights", "Palatine", "Skokie",
+    "Des Plaines", "Orland Park", "Oak Lawn", "Berwyn", "Mount Prospect",
+    "Tinley Park", "Oak Park", "Downers Grove",
+  ],
+  MN: [
+    "Minneapolis", "Saint Paul", "Rochester", "Duluth", "Bloomington",
+    "Brooklyn Park", "Plymouth", "St. Cloud", "Eagan", "Woodbury",
+    "Maple Grove", "Coon Rapids", "Burnsville", "Apple Valley", "Edina",
+    "St. Louis Park", "Minnetonka", "Mankato", "Blaine", "Maplewood",
+    "Shakopee", "Richfield", "Cottage Grove", "Roseville", "Inver Grove Heights",
+  ],
+};
 
+const US_STATES = ["IL", "MN"];
 
 function getMinDate() {
   const d = new Date();
@@ -27,16 +38,23 @@ export default function DeliveryForm({ initial, onSubmit }: {
   const set = (field: keyof CustomerInfo, value: string) =>
     setForm(prev => ({ ...prev, [field]: value }));
 
+  const handleStateChange = (state: string) => {
+    setForm(prev => ({ ...prev, state, city: "" }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(form);
   };
+
+  const cities = form.state ? STATE_CITIES[form.state] || [] : [];
 
   const inputClass = "w-full bg-white/5 border border-white/10 focus:border-orange-500/50 focus:bg-white/8 rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none transition-all text-sm";
   const labelClass = "block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+     
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
         <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
           <User size={18} className="text-orange-400" /> Personal Info
@@ -60,6 +78,7 @@ export default function DeliveryForm({ initial, onSubmit }: {
         </div>
       </div>
 
+     
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
         <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
           <MapPin size={18} className="text-orange-400" /> Delivery Address
@@ -70,21 +89,40 @@ export default function DeliveryForm({ initial, onSubmit }: {
             <input required className={inputClass} placeholder="123 Main St, Apt 4B"
               value={form.address} onChange={e => set("address", e.target.value)} />
           </div>
-          <div>
-            <label className={labelClass}>City *</label>
-            <input required className={inputClass} placeholder="Chicago"
-              value={form.city} onChange={e => set("city", e.target.value)} />
-          </div>
+
+         
           <div>
             <label className={labelClass}>State *</label>
             <select
-            title="Select state"
+            title="Please Select"
              required className={inputClass + " cursor-pointer"}
-              value={form.state} onChange={e => set("state", e.target.value)}>
+              value={form.state} onChange={e => handleStateChange(e.target.value)}>
               <option value="" disabled className="bg-gray-900">Select state</option>
-              {US_STATES.map(s => <option key={s} value={s} className="bg-gray-900">{s}</option>)}
+              {US_STATES.map(s => (
+                <option key={s} value={s} className="bg-gray-900">
+                  {s === "IL" ? "Illinois (IL)" : "Minnesota (MN)"}
+                </option>
+              ))}
             </select>
           </div>
+
+        
+          <div>
+            <label className={labelClass}>City *</label>
+            <select
+            title="Please Select"
+             required className={inputClass + " cursor-pointer"}
+              value={form.city} onChange={e => set("city", e.target.value)}
+              disabled={!form.state}>
+              <option value="" disabled className="bg-gray-900">
+                {form.state ? "Select city" : "Select state first"}
+              </option>
+              {cities.map(c => (
+                <option key={c} value={c} className="bg-gray-900">{c}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="sm:col-span-2">
             <label className={labelClass}>ZIP Code *</label>
             <input required className={inputClass} placeholder="60601" maxLength={5}
@@ -94,20 +132,24 @@ export default function DeliveryForm({ initial, onSubmit }: {
         </div>
       </div>
 
+    
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
         <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
-          <Calendar size={18} className="text-orange-400" /> Delivery Schedule
+          <Clock size={18} className="text-orange-400" /> Delivery Schedule
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Preferred Date *</label>
             <input
-            title="Select delivery date" required type="date" min={getMinDate()} className={inputClass + " cursor-pointer"}
+            title="Input"
+             required type="date" min={getMinDate()} className={inputClass + " cursor-pointer"}
               value={form.deliveryDate} onChange={e => set("deliveryDate", e.target.value)} />
           </div>
           <div>
             <label className={labelClass}>Preferred Time *</label>
-            <select title="Select delivery time" required className={inputClass + " cursor-pointer"}
+            <select
+            title="Please Select"
+             required className={inputClass + " cursor-pointer"}
               value={form.deliveryTime} onChange={e => set("deliveryTime", e.target.value)}>
               <option value="" disabled className="bg-gray-900">Select time</option>
               <option value="10:00 AM - 12:00 PM" className="bg-gray-900">10:00 AM – 12:00 PM</option>
@@ -127,8 +169,8 @@ export default function DeliveryForm({ initial, onSubmit }: {
       </div>
 
       <button type="submit"
-        className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2">
-        <Clock size={18} /> Continue to Review
+        className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 active:scale-95">
+        Continue to Review →
       </button>
     </form>
   );

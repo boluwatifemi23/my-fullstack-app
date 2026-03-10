@@ -185,9 +185,9 @@ export default function AdminCategories() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {categories.map((cat) => (
             <div key={cat._id} className="bg-gray-800 border border-white/10 rounded-2xl overflow-hidden group hover:border-orange-500/30 transition-all">
-              <div className="relative h-24 bg-linear-to-br from-orange-500/20 to-amber-500/20">
+              <div className="relative h-24 bg-gradient-to-br from-orange-500/20 to-amber-500/20">
                 {cat.image ? (
-                  <Image src={cat.image} alt={cat.name} fill className="object-cover opacity-80" />
+                  <Image src={cat.image} alt={cat.name} fill className="object-cover" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-3xl">🍽️</div>
                 )}
