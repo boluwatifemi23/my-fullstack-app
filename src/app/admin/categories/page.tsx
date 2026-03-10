@@ -64,6 +64,7 @@ export default function AdminCategories() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    console.log("Submitting form:", form);
     try {
       const url = editingId ? `/api/categories/${editingId}` : "/api/categories";
       const method = editingId ? "PUT" : "POST";

@@ -16,11 +16,14 @@ export default function PaymentForm({ orderId, total, subtotal, deliveryFee, onB
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitted) return;
     if (!stripe || !elements) return;
+    setSubmitted(true);
     setLoading(true);
     setError("");
 
@@ -32,11 +35,11 @@ export default function PaymentForm({ orderId, total, subtotal, deliveryFee, onB
     if (stripeError) {
       setError(stripeError.message || "Payment failed. Please try again.");
       setLoading(false);
+      setSubmitted(false);
       return;
     }
 
     if (paymentIntent?.status === "succeeded") {
-      // Confirm on our backend + send email
       const res = await fetch("/api/confirm-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,6 +49,7 @@ export default function PaymentForm({ orderId, total, subtotal, deliveryFee, onB
         onSuccess();
       } else {
         setError("Payment succeeded but order confirmation failed. Please contact support with Order ID: " + orderId);
+        setSubmitted(false);
       }
     }
     setLoading(false);
@@ -53,7 +57,8 @@ export default function PaymentForm({ orderId, total, subtotal, deliveryFee, onB
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Order Summary */}
+
+    
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5">
         <h2 className="text-white font-bold mb-3 flex items-center gap-2">
           <Lock size={16} className="text-orange-400" /> Order Summary
@@ -72,7 +77,7 @@ export default function PaymentForm({ orderId, total, subtotal, deliveryFee, onB
         </div>
       </div>
 
-      {/* Stripe Payment Element */}
+    
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5">
         <h2 className="text-white font-bold mb-4 flex items-center gap-2">
           <Lock size={16} className="text-orange-400" /> Card Details
@@ -87,14 +92,16 @@ export default function PaymentForm({ orderId, total, subtotal, deliveryFee, onB
       )}
 
       <div className="flex gap-3">
-        <button type="button" onClick={onBack} disabled={loading}
+        <button type="button" onClick={onBack} disabled={loading || submitted}
           className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-xl font-medium text-sm transition-all disabled:opacity-50">
           <ArrowLeft size={16} /> Back
         </button>
-        <button type="submit" disabled={loading || !stripe}
+        <button type="submit" disabled={loading || !stripe || submitted}
           className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 active:scale-95 flex items-center justify-center gap-2">
           {loading
             ? <><Loader2 size={18} className="animate-spin" /> Processing...</>
+            : submitted
+            ? <><Loader2 size={18} className="animate-spin" /> Please wait...</>
             : <><Lock size={16} /> Pay ${total.toFixed(2)}</>}
         </button>
       </div>

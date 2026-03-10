@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CustomerInfo } from "../page";
 import { MapPin, User, Clock } from "lucide-react";
+import { isDeliverable } from "@/app/lib/deliveryZones";
 
 const STATE_CITIES: Record<string, string[]> = {
   IL: [
@@ -49,11 +50,16 @@ export default function DeliveryForm({ initial, onSubmit }: {
 
   const cities = form.state ? STATE_CITIES[form.state] || [] : [];
 
+  const zipStatus = form.zip.length === 5
+    ? isDeliverable(form.zip) ? "valid" : "invalid"
+    : "none";
+
   const inputClass = "w-full bg-white/5 border border-white/10 focus:border-orange-500/50 focus:bg-white/8 rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none transition-all text-sm";
   const labelClass = "block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+
      
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
         <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
@@ -90,12 +96,10 @@ export default function DeliveryForm({ initial, onSubmit }: {
               value={form.address} onChange={e => set("address", e.target.value)} />
           </div>
 
-         
+          
           <div>
             <label className={labelClass}>State *</label>
-            <select
-            title="Please Select"
-             required className={inputClass + " cursor-pointer"}
+            <select title="Please Select" required className={inputClass + " cursor-pointer"}
               value={form.state} onChange={e => handleStateChange(e.target.value)}>
               <option value="" disabled className="bg-gray-900">Select state</option>
               {US_STATES.map(s => (
@@ -106,12 +110,10 @@ export default function DeliveryForm({ initial, onSubmit }: {
             </select>
           </div>
 
-        
+          
           <div>
             <label className={labelClass}>City *</label>
-            <select
-            title="Please Select"
-             required className={inputClass + " cursor-pointer"}
+            <select title="Please Select" required className={inputClass + " cursor-pointer"}
               value={form.city} onChange={e => set("city", e.target.value)}
               disabled={!form.state}>
               <option value="" disabled className="bg-gray-900">
@@ -123,16 +125,41 @@ export default function DeliveryForm({ initial, onSubmit }: {
             </select>
           </div>
 
+         
           <div className="sm:col-span-2">
             <label className={labelClass}>ZIP Code *</label>
-            <input required className={inputClass} placeholder="60601" maxLength={5}
-              value={form.zip} onChange={e => set("zip", e.target.value.replace(/\D/g, ""))} />
-            <p className="text-xs text-gray-500 mt-1">We deliver to Chicago and Minnesota areas</p>
+            <div className="relative">
+              <input
+                required
+                className={`${inputClass} pr-10 ${
+                  zipStatus === "valid" ? "border-green-500/50 focus:border-green-500/50" :
+                  zipStatus === "invalid" ? "border-red-500/50 focus:border-red-500/50" : ""
+                }`}
+                placeholder="60601"
+                maxLength={5}
+                value={form.zip}
+                onChange={e => set("zip", e.target.value.replace(/\D/g, ""))}
+              />
+              {zipStatus === "valid" && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-lg font-bold">✓</span>
+              )}
+              {zipStatus === "invalid" && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-lg font-bold">✗</span>
+              )}
+            </div>
+            {zipStatus === "valid" && (
+              <p className="text-green-400 text-xs mt-1">✓ Great! We deliver to this area.</p>
+            )}
+            {zipStatus === "invalid" && (
+              <p className="text-red-400 text-xs mt-1">✗ Sorry, we do not deliver to this ZIP code yet.</p>
+            )}
+            {zipStatus === "none" && (
+              <p className="text-gray-500 text-xs mt-1">We deliver to Chicago and Minnesota areas</p>
+            )}
           </div>
         </div>
       </div>
 
-    
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
         <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
           <Clock size={18} className="text-orange-400" /> Delivery Schedule
@@ -140,16 +167,13 @@ export default function DeliveryForm({ initial, onSubmit }: {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Preferred Date *</label>
-            <input
-            title="Input"
-             required type="date" min={getMinDate()} className={inputClass + " cursor-pointer"}
+            <input title="Input" required type="date" min={getMinDate()}
+              className={inputClass + " cursor-pointer"}
               value={form.deliveryDate} onChange={e => set("deliveryDate", e.target.value)} />
           </div>
           <div>
             <label className={labelClass}>Preferred Time *</label>
-            <select
-            title="Please Select"
-             required className={inputClass + " cursor-pointer"}
+            <select title="Please Select" required className={inputClass + " cursor-pointer"}
               value={form.deliveryTime} onChange={e => set("deliveryTime", e.target.value)}>
               <option value="" disabled className="bg-gray-900">Select time</option>
               <option value="10:00 AM - 12:00 PM" className="bg-gray-900">10:00 AM – 12:00 PM</option>
