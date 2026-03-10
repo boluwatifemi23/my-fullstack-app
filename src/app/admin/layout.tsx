@@ -12,6 +12,7 @@ import {
   Menu,
   ChefHat,
    Users,
+   ShoppingBag,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin/meals", label: "Meals", icon: UtensilsCrossed },
   { href: "/admin/categories", label: "Categories", icon: Tag },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/orders", icon: ShoppingBag, label: "Orders" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
