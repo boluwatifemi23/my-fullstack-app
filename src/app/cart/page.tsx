@@ -11,12 +11,13 @@ export default function CartPage() {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (items.length === 0) {
-    
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 relative overflow-hidden">
-      
-        <div className="absolute top-20 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute -top-20 -left-20 w-[500px] h-[500px] bg-orange-600/25 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-20 -right-20 w-[450px] h-[450px] bg-amber-500/20 rounded-full blur-3xl animate-pulse delay-700" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-orange-500/15 rounded-full blur-3xl animate-pulse delay-500" />
+        </div>
 
         <div className="relative text-center max-w-sm">
           <div className="w-24 h-24 mx-auto mb-6 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -35,15 +36,14 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 relative overflow-hidden">
-    
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-        <div className="absolute top-20 -left-20 w-96 h-96 bg-orange-500/8 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 right-0 w-80 h-80 bg-amber-500/8 rounded-full blur-3xl animate-pulse delay-700" />
-        <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-orange-600/8 rounded-full blur-3xl animate-pulse delay-1500" />
+        <div className="absolute -top-20 -left-20 w-[500px] h-[500px] bg-orange-600/25 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -right-20 w-[400px] h-[400px] bg-amber-500/20 rounded-full blur-3xl animate-pulse delay-700" />
+        <div className="absolute -bottom-20 left-1/3 w-[450px] h-[450px] bg-orange-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/3 left-1/2 w-[300px] h-[300px] bg-red-600/10 rounded-full blur-3xl animate-pulse delay-500" />
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 py-10">
-       
         <div className="flex items-center gap-4 mb-8">
           <Link href="/" className="text-gray-400 hover:text-orange-500 transition p-2 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10">
             <ArrowLeft size={18} />
@@ -55,7 +55,6 @@ export default function CartPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-         
           <div className="lg:col-span-2 space-y-3">
             {items.map((item) => (
               <div key={item._id}
@@ -75,23 +74,18 @@ export default function CartPage() {
                 </div>
 
                 <div className="flex flex-col items-end justify-between">
-                  <button
-                     title="Remove item"
+                  <button title="Remove item"
                     onClick={() => { removeFromCart(item._id); toast.success(`${item.name} removed`); }}
                     className="text-gray-500 hover:text-red-400 transition p-1 rounded-lg hover:bg-red-400/10">
                     <Trash2 size={15} />
                   </button>
                   <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
-                    <button
-                    title="Decrease quantity"
-                     onClick={() => decreaseQuantity(item._id)}
+                    <button title="Decrease quantity" onClick={() => decreaseQuantity(item._id)}
                       className="text-gray-400 hover:text-orange-400 transition">
                       <Minus size={13} />
                     </button>
                     <span className="w-6 text-center font-bold text-white text-sm">{item.quantity}</span>
-                    <button
-                     title="Add"
-                     onClick={() => addToCart(item)}
+                    <button title="Increase quantity" onClick={() => addToCart(item)}
                       className="text-gray-400 hover:text-orange-400 transition">
                       <Plus size={13} />
                     </button>
@@ -106,7 +100,6 @@ export default function CartPage() {
             </button>
           </div>
 
-         
           <div className="lg:col-span-1">
             <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sticky top-24">
               <h2 className="font-bold text-white text-lg mb-4">Order Summary</h2>
