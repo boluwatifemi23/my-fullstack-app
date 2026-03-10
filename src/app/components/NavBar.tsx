@@ -16,13 +16,12 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+useEffect(() => {
+  const onScroll = () => setScrolled(window.scrollY > 60);
+  window.addEventListener("scroll", onScroll);
+  return () => window.removeEventListener("scroll", onScroll);
+}, [ ]);
 
- 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
 
@@ -31,7 +30,6 @@ export default function Navbar() {
       return;
     }
 
-   
     router.push("/#menu");
   };
 
@@ -55,11 +53,11 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16">
             <Logo className="h-10 w-10" />
 
-            
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className={linkClass("/")}>Home</Link>
+              <Link href="/" className={linkClass("/")}>
+                Home
+              </Link>
 
-             
               <button
                 onClick={() => scrollToSection("menu")}
                 className="text-sm font-medium hover:text-[#f54a00] transition-colors"
@@ -67,12 +65,17 @@ export default function Navbar() {
                 Menu
               </button>
 
-              <Link href="/catering" className={linkClass("/catering")}>Catering</Link>
-              <Link href="/about" className={linkClass("/about")}>About</Link>
-              <Link href="/contact" className={linkClass("/contact")}>Contact</Link>
+              <Link href="/catering" className={linkClass("/catering")}>
+                Catering
+              </Link>
+              <Link href="/about" className={linkClass("/about")}>
+                About
+              </Link>
+              <Link href="/contact" className={linkClass("/contact")}>
+                Contact
+              </Link>
             </nav>
 
-            
             <Link
               href="/cart"
               className="relative inline-flex items-center p-2 rounded-md hover:bg-white/10"
@@ -96,10 +99,12 @@ export default function Navbar() {
               )}
             </Link>
 
-            
             {user ? (
               <div className="flex items-center gap-2">
-                <Link href="/profile" className="flex items-center gap-2 hover:text-[#f54a00] transition">
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 hover:text-[#f54a00] transition"
+                >
                   <User size={20} />
                   <span className="hidden sm:inline">{user.firstName}</span>
                 </Link>
@@ -127,7 +132,6 @@ export default function Navbar() {
               </div>
             )}
 
-            
             <button
               onClick={() => setOpen(!open)}
               aria-label={open ? "Close menu" : "Open menu"}
@@ -146,20 +150,29 @@ export default function Navbar() {
         </div>
       </div>
 
-      
       {open && (
         <div className="md:hidden bg-linear-to-b from-[#f54a00] via-orange-600 to-amber-400 text-white">
           <div className="px-4 py-4 space-y-3">
-            <Link href="/" className={linkClass("/")}>Home</Link>
+            <Link href="/" className={linkClass("/")}>
+              Home
+            </Link>
 
-            
-            <button onClick={() => scrollToSection("menu")} className="text-left">
+            <button
+              onClick={() => scrollToSection("menu")}
+              className="text-left"
+            >
               Menu
             </button>
 
-            <Link href="/catering" className={linkClass("/catering")}>Catering</Link>
-            <Link href="/about" className={linkClass("/about")}>About</Link>
-            <Link href="/contact" className={linkClass("/contact")}>Contact</Link>
+            <Link href="/catering" className={linkClass("/catering")}>
+              Catering
+            </Link>
+            <Link href="/about" className={linkClass("/about")}>
+              About
+            </Link>
+            <Link href="/contact" className={linkClass("/contact")}>
+              Contact
+            </Link>
 
             <div className="pt-2 border-t border-white/30 mt-2 flex flex-col gap-2">
               {user ? (
