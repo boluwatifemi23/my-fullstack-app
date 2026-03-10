@@ -7,6 +7,8 @@ import { nanoid } from "nanoid";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
+console.log("KEY:", JSON.stringify(process.env.STRIPE_SECRET_KEY));
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

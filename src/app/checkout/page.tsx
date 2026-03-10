@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/app/context/CartContext";
 import { useRouter } from "next/navigation";
 import { isDeliverable } from "@/app/lib/deliveryZones";
@@ -45,10 +45,13 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
   if (items.length === 0 && step < 2) {
     router.replace("/");
-    return null;
   }
+}, [items.length, step, router]);
+
+if (items.length === 0 && step < 2) return null;
 
   const handleDeliverySubmit = async (info: CustomerInfo) => {
     setError("");
