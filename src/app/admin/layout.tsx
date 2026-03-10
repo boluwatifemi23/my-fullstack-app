@@ -11,12 +11,14 @@ import {
   LogOut,
   Menu,
   ChefHat,
+   Users,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/meals", label: "Meals", icon: UtensilsCrossed },
   { href: "/admin/categories", label: "Categories", icon: Tag },
+  { href: "/admin/users", label: "Users", icon: Users },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
