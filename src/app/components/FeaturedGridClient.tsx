@@ -11,7 +11,7 @@ export default function FeaturedGridClient({ meals }: { meals: MealType[] }) {
           key={m._id}
           className="transform transition hover:-translate-y-1 hover:shadow-2xl rounded-xl"
         >
-          <MealCardClient meal={m} compact />
+          <MealCardClient meal={m} />
         </div>
       ))}
     </div>

@@ -109,7 +109,7 @@ export default function CartPage() {
                 {items.map((item) => (
                   <div key={item._id} className="flex justify-between text-gray-600">
                     <span>{item.name} × {item.quantity}</span>
-                    <span>₦{(item.price * item.quantity).toLocaleString()}</span>
+                    <span>${(item.price * item.quantity).toLocaleString()}</span>
                   </div>
                 ))}
               </div>

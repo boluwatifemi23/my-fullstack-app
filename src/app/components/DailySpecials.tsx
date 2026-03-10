@@ -34,7 +34,7 @@ export default function DailySpecials({ meals }: { meals: MealType[] }) {
             key={m._id}
             className="w-64 transition duration-500 hover:scale-105 will-change-transform"
           >
-            <MealCardClient meal={m} compact />
+            <MealCardClient meal={m} />
           </div>
         ))}
       </div>

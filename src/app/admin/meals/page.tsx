@@ -295,7 +295,7 @@ export default function AdminMeals() {
                       {meal.category.replace(/-/g, " ")}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-white font-semibold">₦{meal.price.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-white font-semibold">${meal.price.toLocaleString()}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => openEdit(meal)} title="Edit Meal"
