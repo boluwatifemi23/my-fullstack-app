@@ -10,7 +10,6 @@ export default function DailySpecials({ meals }: { meals: MealType[] }) {
   });
 
   useEffect(() => {
-    if (meals.length === 0) return;
     const t = setInterval(() => {
       setIndex((i) => (i + 1) % meals.length);
     }, 6000);
@@ -28,13 +27,10 @@ export default function DailySpecials({ meals }: { meals: MealType[] }) {
   return (
     <section className="mt-10">
       <h3 className="text-2xl font-semibold mb-4">Daily Specials</h3>
-      <div className="flex gap-4 items-center justify-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {windowItems.map((m) => (
-          <div
-            key={m._id}
-            className="w-64 transition duration-500 hover:scale-105 will-change-transform"
-          >
-            <MealCardClient meal={m} />
+          <div key={m._id} className="w-full transform transition duration-500 hover:scale-105">
+            <MealCardClient meal={m}/>
           </div>
         ))}
       </div>

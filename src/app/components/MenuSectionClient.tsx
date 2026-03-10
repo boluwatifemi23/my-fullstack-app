@@ -30,16 +30,14 @@ export default function MenuSectionClient() {
       setLoading(false);
     }
     load();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   return (
-    <section id="menu" className="py-12 max-w-7xl mx-auto px-6">
+    <section id="menu" className="py-12 max-w-7xl mx-auto px-4 sm:px-6">
       <div className="mb-8">
         <h2 className="text-3xl font-extrabold">Our Menu</h2>
-        <p className="text-gray-600 mt-2 max-w-xl">Dear Esteemed customer — this is our new “Blast Off” menu pricing.</p>
+        <p className="text-gray-600 mt-2 max-w-xl">Dear Esteemed customer — this is our new Blast Off menu pricing.</p>
       </div>
 
       {loading ? (
@@ -50,12 +48,10 @@ export default function MenuSectionClient() {
       ) : (
         <>
           <CategoriesCarousel categories={categories} />
-
           <div className="mt-8">
             <h3 className="text-2xl font-semibold mb-4">Featured</h3>
             <FeaturedGridClient meals={featured} />
           </div>
-
           <DailySpecials meals={specials} />
         </>
       )}
