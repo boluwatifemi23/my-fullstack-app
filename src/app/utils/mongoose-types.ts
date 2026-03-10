@@ -5,6 +5,7 @@ export interface LeanCategoryDoc {
   _id: Types.ObjectId;
   name: string;
   slug: string;
+   image?: string;
   description?: string;
   order?: number;
   createdAt?: Date;

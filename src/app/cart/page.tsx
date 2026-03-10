@@ -11,6 +11,7 @@ export default function CartPage() {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (items.length === 0) {
+    
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 relative overflow-hidden">
       

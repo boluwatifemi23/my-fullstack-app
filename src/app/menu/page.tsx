@@ -1,44 +1,18 @@
-
-import Link from "next/link";
 import { connectDB } from "@/app/lib/dbConnect";
 import Category from "@/app/models/Category";
 import Meal, { MealType } from "@/app/models/Meal";
-import MealCardClient from "@/app/components/MealCardClient";
 import { LeanCategoryDoc, LeanMealDoc } from "@/app/utils/mongoose-types";
-import ImageWithFallback from "../components/ImageWithFallBack";
+import CategoriesCarousel from "@/app/components/CategoriesCarousel";
+import MealCardClient from "@/app/components/MealCardClient";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export const metadata = {
-  title: "Menu - Cornerstone Catering",
+  title: "Menu - Cornerstone Catering Services",
   description: "Explore our authentic Nigerian menu",
 };
 
 export const revalidate = 60;
-
-
-const categoryImages: Record<string, string> = {
-  "small-chops": "/images/assorted-meat.png",
-  "soups-stews": "/images/assorted-meat.png",
-  stew: "/images/assorted-meat.png",
-  "special-delicacy": "/images/assorted-meat.png",
-  salads: "/images/assorted-meat.png",
-  proteins: "/images/assorted-meat.png",
-  seafood: "/images/assorted-meat.png",
-  "main-dish": "/images/assorted-meat.png",
-  accompaniments: "/images/assorted-meat.png",
-};
-
-
-const categoryColors = [
-  "from-orange-500 to-red-500",
-  "from-amber-500 to-orange-500",
-  "from-yellow-500 to-amber-500",
-  "from-green-500 to-emerald-500",
-  "from-blue-500 to-cyan-500",
-  "from-purple-500 to-pink-500",
-  "from-red-500 to-rose-500",
-  "from-teal-500 to-green-500",
-  "from-indigo-500 to-purple-500",
-];
 
 async function getMenuData() {
   await connectDB();
@@ -52,6 +26,7 @@ async function getMenuData() {
     _id: cat._id.toString(),
     name: cat.name,
     slug: cat.slug,
+    image: cat.image || "",
   }));
 
   const featuredRaw = (await Meal.find()
@@ -76,106 +51,66 @@ export default async function MenuIndexPage() {
   const { categories, featured } = await getMenuData();
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-12">
-      <header className="mb-8">
-        <h2 className="text-4xl font-extrabold text-gray-900">Our Menu</h2>
-        <p className="mt-2 text-gray-600 max-w-xl">
-          Dear Esteemed customer — this is our new Blast Off menu pricing. Same
-          great quality — enjoy!
-        </p>
-      </header>
+    <main className="min-h-screen bg-gray-950 relative overflow-hidden">
+      {/* Animated background blobs */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-600/8 rounded-full blur-3xl animate-pulse delay-700" />
+        <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-orange-700/6 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
 
-      
-      <section className="mb-12">
-        <h3 className="text-2xl font-semibold mb-4">Categories</h3>
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map((cat, idx) => {
-            const hasImage = categoryImages[cat.slug];
+      <div className="relative max-w-7xl mx-auto px-6 py-16">
 
-            return (
-              <Link
-                key={cat._id}
-                href={`/menu/${cat.slug}`}
-                className="min-w-[160px] shrink-0 rounded-2xl overflow-hidden shadow-lg relative hover:shadow-xl transition-all transform hover:scale-105"
-              >
-                <div className="relative w-40 h-24">
-                  {hasImage ? (
-                    <>
-                      <ImageWithFallback
-                        src={categoryImages[cat.slug]}
-                        alt={cat.name}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 40vw, 160px"
-                      />
-
-                      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                    </>
-                  ) : (
-                    
-                    <div
-                      className={`absolute inset-0 bg-linear-to-br ${
-                        categoryColors[idx % categoryColors.length]
-                      }`}
-                    >
-                      <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                        <svg
-                          className="w-16 h-16 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                          <path
-                            fillRule="evenodd"
-                            d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                    </div>
-                  )}
-
-                 
-                  <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center border border-white/50 z-10">
-                    <span className="text-white font-bold text-sm">
-                      {idx + 1}
-                    </span>
-                  </div>
-
-                 
-                  <div className="absolute inset-0 flex items-end p-3 z-10">
-                    <div className="text-white font-semibold text-sm drop-shadow-lg">
-                      {cat.name}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-    
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-semibold">Featured</h3>
+        {/* Header */}
+        <div className="mb-12">
+          <span className="inline-block px-4 py-1.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm font-semibold rounded-full mb-4">
+            Our Menu
+          </span>
+          <h1 className="text-4xl font-extrabold text-white">Authentic Nigerian Meals</h1>
+          <p className="text-gray-400 mt-2 max-w-xl">
+            Dear Esteemed customer — this is our new Blast Off menu pricing. Same great quality — enjoy!
+          </p>
         </div>
 
-        {featured.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">
-              No meals available yet. Check back soon!
-            </p>
+        {/* Categories */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-2xl font-bold text-white">Browse by Category</h2>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {featured.map((meal) => (
-              <MealCardClient key={meal._id} meal={meal} />
+          <CategoriesCarousel categories={categories} />
+        </section>
+
+        {/* All categories grid */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-5">All Categories</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {categories.map((cat) => (
+              <Link key={cat._id} href={`/menu/${cat.slug}`}
+                className="group bg-white/5 hover:bg-orange-500/10 border border-white/10 hover:border-orange-500/30 rounded-2xl p-4 text-center transition-all duration-200">
+                <p className="text-white font-semibold text-sm group-hover:text-orange-400 transition-colors">{cat.name}</p>
+                <p className="text-gray-500 text-xs mt-1">View meals →</p>
+              </Link>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+
+        {/* Featured */}
+        <section>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-2xl font-bold text-white">Featured Meals</h2>
+          </div>
+          {featured.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No meals available yet. Check back soon!</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {featured.map((meal) => (
+                <MealCardClient key={meal._id} meal={meal} />
+              ))}
+            </div>
+          )}
+        </section>
+
+      </div>
     </main>
   );
 }

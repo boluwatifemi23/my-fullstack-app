@@ -10,6 +10,7 @@ export default function ProfilePage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
 
+  
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [user, loading, router]);
