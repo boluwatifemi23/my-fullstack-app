@@ -1,10 +1,10 @@
 "use client";
 
-import { useState} from "react";
+import { useState, Suspense } from "react";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function VerifyOtp() {
+function VerifyOtpContent() {
   const router = useRouter();
   const params = useSearchParams();
   const email = params.get("email") || "";
@@ -13,10 +13,9 @@ export default function VerifyOtp() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
- 
     const res = await fetch("/api/auth/verify-otp", {
       method: "POST",
       body: JSON.stringify({ email, otp }),
@@ -36,9 +35,9 @@ export default function VerifyOtp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-black via-[#1a0f0a] to-black text-white">
-      <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-8 rounded-2xl w-full max-w-md shadow-xl animate-scaleIn">
-        <h2 className="text-3xl font-bold text-center bg-linear-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-[#1a0f0a] to-black text-white">
+      <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-8 rounded-2xl w-full max-w-md shadow-xl">
+        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-orange-400 to-yellow-500 bg-clip-text text-transparent">
           Verify OTP
         </h2>
 
@@ -62,14 +61,24 @@ export default function VerifyOtp() {
             />
           </div>
 
-          <button
-            disabled={loading}
-            className="w-full bg-linear-to-r from-orange-500 to-amber-400 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-40"
-          >
+          <button disabled={loading}
+            className="w-full bg-gradient-to-r from-orange-500 to-amber-400 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-40">
             {loading ? "Verifying..." : "Verify OTP"}
           </button>
         </form>
       </div>
     </div>
+  );
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <VerifyOtpContent />
+    </Suspense>
   );
 }
