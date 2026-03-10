@@ -5,10 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { Trash2, ShoppingBag, ArrowLeft, Plus, Minus } from "lucide-react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { items, clear, addToCart, removeFromCart, decreaseQuantity } = useCart();
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const router = useRouter();
 
   if (items.length === 0) {
     return (
@@ -120,7 +123,7 @@ export default function CartPage() {
               </div>
 
               <button
-                onClick={() => toast("Checkout coming soon! 🚀", { icon: "ℹ️" })}
+                onClick={() => router.push("/checkout")}
                 className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all shadow-lg shadow-orange-500/20 active:scale-95">
                 Proceed to Checkout
               </button>
