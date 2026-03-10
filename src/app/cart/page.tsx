@@ -70,7 +70,7 @@ export default function CartPage() {
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
                   <p className="text-sm text-gray-500 capitalize">{item.category.replace(/-/g, " ")}</p>
-                  <p className="text-orange-600 font-bold mt-1">₦{item.price.toLocaleString()}</p>
+                  <p className="text-orange-600 font-bold mt-1">${item.price.toLocaleString()}</p>
                 </div>
 
                 <div className="flex flex-col items-end justify-between">
@@ -116,7 +116,7 @@ export default function CartPage() {
               <div className="border-t pt-4 mb-6">
                 <div className="flex justify-between font-bold text-gray-900">
                   <span>Subtotal</span>
-                  <span>₦{subtotal.toLocaleString()}</span>
+                  <span>${subtotal.toLocaleString()}</span>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">Delivery fees calculated at checkout</p>
               </div>

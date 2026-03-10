@@ -10,14 +10,14 @@ const packages = [
   {
     name: "Small Gathering",
     guests: "Up to 30 guests",
-    price: "From ₦150,000",
+    price: "From $150,000",
     features: ["2 rice dishes", "1 protein option", "1 salad", "Small chops", "Drinks"],
     highlight: false,
   },
   {
     name: "Mid-Size Event",
     guests: "30–100 guests",
-    price: "From ₦400,000",
+    price: "From $400,000",
     features: ["3 rice dishes", "2 protein options", "2 soups/stews", "Small chops", "Salads", "Drinks & dessert"],
     highlight: true,
   },
