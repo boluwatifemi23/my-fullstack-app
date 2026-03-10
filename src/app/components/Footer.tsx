@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "./Logo";
 
 export default function Footer() {
   return (
@@ -6,17 +7,12 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
 
-        
+         
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">CC</span>
-              </div>
-              <span className="text-white font-bold text-lg">
-                Cornerstone<span className="text-orange-500">Catering</span>
-              </span>
+            <div className="mb-4">
+              <Logo className="h-10 w-10" />
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+            <p className="text-gray-400 text-sm leading-relaxed max-w-xs mt-3">
               Authentic Nigerian meals crafted with love. Same great quality, every time.
             </p>
           </div>
