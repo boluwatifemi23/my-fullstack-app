@@ -1,10 +1,10 @@
 import "./globals.css";
 import { ReactNode } from "react";
-import Navbar from "./components/NavBar";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
-import Footer from "./components/Footer";
+import ConditionalFooter from "./components/ConditionalFooter";
+import ConditionalNavbar from "./components/ConditionalNavbar";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
@@ -41,10 +41,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="min-h-screen bg-gray-950 text-gray-900 antialiased flex flex-col">
         <AuthProvider>
           <CartProvider>
-            <Navbar />
+            <ConditionalNavbar />
             <Toaster position="top-right" />
             <main id="content" className="flex-1">{children}</main>
-            <Footer />
+            <ConditionalFooter />
           </CartProvider>
         </AuthProvider>
       </body>

@@ -10,8 +10,11 @@ import { ChefHat } from "lucide-react";
 import DeliveryForm from "./componenets/DeliveryForm";
 import ReviewOrder from "./componenets/ReviewOrder";
 import PaymentForm from "./componenets/PaymentForm";
+import Logo from "../components/Logo";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
 
 export type CustomerInfo = {
   name: string;
@@ -33,9 +36,16 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [customer, setCustomer] = useState<CustomerInfo>({
-    name: "", email: "", phone: "", address: "",
-    city: "", state: "", zip: "",
-    deliveryDate: "", deliveryTime: "", specialInstructions: "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    deliveryDate: "",
+    deliveryTime: "",
+    specialInstructions: "",
   });
   const [clientSecret, setClientSecret] = useState("");
   const [orderId, setOrderId] = useState("");
@@ -46,17 +56,19 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-  if (items.length === 0 && step < 2) {
-    router.replace("/");
-  }
-}, [items.length, step, router]);
+    if (items.length === 0 && step < 2) {
+      router.replace("/");
+    }
+  }, [items.length, step, router]);
 
-if (items.length === 0 && step < 2) return null;
+  if (items.length === 0 && step < 2) return null;
 
   const handleDeliverySubmit = async (info: CustomerInfo) => {
     setError("");
     if (!isDeliverable(info.zip)) {
-      setError("Sorry, we don't deliver to this ZIP code yet. We serve Chicago and Minnesota areas.");
+      setError(
+        "Sorry, we don't deliver to this ZIP code yet. We serve Chicago and Minnesota areas.",
+      );
       return;
     }
     setCustomer(info);
@@ -72,7 +84,7 @@ if (items.length === 0 && step < 2) return null;
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer,
-          items: items.map(i => ({
+          items: items.map((i) => ({
             mealId: i._id,
             name: i.name,
             price: i.price,
@@ -85,7 +97,11 @@ if (items.length === 0 && step < 2) return null;
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error); setLoading(false); return; }
+      if (!res.ok) {
+        setError(data.error);
+        setLoading(false);
+        return;
+      }
       setClientSecret(data.clientSecret);
       setOrderId(data.orderId);
       setTotal(data.total);
@@ -113,46 +129,54 @@ if (items.length === 0 && step < 2) return null;
 
       <div className="relative max-w-2xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
-            <ChefHat size={20} className="text-white" />
-          </div>
+          <Logo className="h-10 w-10" />
           <div>
             <h1 className="text-2xl font-bold text-white">Checkout</h1>
-            <p className="text-gray-400 text-sm">Secure checkout powered by Stripe</p>
+            <p className="text-gray-400 text-sm">
+              Secure checkout powered by Stripe
+            </p>
           </div>
         </div>
 
-       
         <div className="flex items-center mb-8">
           {STEPS.map((label, i) => (
-            <div key={label} className="flex items-center flex-1 last:flex-none">
+            <div
+              key={label}
+              className="flex items-center flex-1 last:flex-none"
+            >
               <div className="flex flex-col items-center">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all ${
-                  i < step ? "bg-orange-500 border-orange-500 text-white" :
-                  i === step ? "border-orange-500 text-orange-500 bg-orange-500/10" :
-                  "border-white/20 text-gray-500 bg-white/5"
-                }`}>
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all ${
+                    i < step
+                      ? "bg-orange-500 border-orange-500 text-white"
+                      : i === step
+                        ? "border-orange-500 text-orange-500 bg-orange-500/10"
+                        : "border-white/20 text-gray-500 bg-white/5"
+                  }`}
+                >
                   {i < step ? "✓" : i + 1}
                 </div>
-                <span className={`text-xs mt-1 font-medium ${i === step ? "text-orange-400" : i < step ? "text-orange-300" : "text-gray-500"}`}>
+                <span
+                  className={`text-xs mt-1 font-medium ${i === step ? "text-orange-400" : i < step ? "text-orange-300" : "text-gray-500"}`}
+                >
                   {label}
                 </span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-2 mb-4 rounded transition-all ${i < step ? "bg-orange-500" : "bg-white/10"}`} />
+                <div
+                  className={`flex-1 h-0.5 mx-2 mb-4 rounded transition-all ${i < step ? "bg-orange-500" : "bg-white/10"}`}
+                />
               )}
             </div>
           ))}
         </div>
 
-        
         {error && (
           <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
             {error}
           </div>
         )}
 
-        
         {step === 0 && (
           <DeliveryForm initial={customer} onSubmit={handleDeliverySubmit} />
         )}
@@ -166,7 +190,10 @@ if (items.length === 0 && step < 2) return null;
           />
         )}
         {step === 2 && clientSecret && (
-          <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: "night" } }}>
+          <Elements
+            stripe={stripePromise}
+            options={{ clientSecret, appearance: { theme: "night" } }}
+          >
             <PaymentForm
               clientSecret={clientSecret}
               orderId={orderId}
