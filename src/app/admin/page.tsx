@@ -37,7 +37,6 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     let cancelled = false;
-
     const load = async () => {
       const [mealsRes, catsRes, ordersRes] = await Promise.all([
         fetch("/api/meals"),
@@ -50,28 +49,22 @@ export default function AdminDashboard() {
 
       if (!cancelled) {
         const totalRevenue = Array.isArray(orders)
-          ? orders.filter(o => o.paymentStatus === "paid").reduce((s, o) => s + o.total, 0)
-          : 0;
+          ? orders.filter(o => o.paymentStatus === "paid").reduce((s, o) => s + o.total, 0) : 0;
         const pendingOrders = Array.isArray(orders)
-          ? orders.filter(o => o.deliveryStatus !== "delivered").length
-          : 0;
+          ? orders.filter(o => o.deliveryStatus !== "delivered").length : 0;
         const deliveredOrders = Array.isArray(orders)
-          ? orders.filter(o => o.deliveryStatus === "delivered").length
-          : 0;
+          ? orders.filter(o => o.deliveryStatus === "delivered").length : 0;
 
         setStats({
           meals: Array.isArray(meals) ? meals.length : 0,
           categories: Array.isArray(cats) ? cats.length : 0,
           totalOrders: Array.isArray(orders) ? orders.length : 0,
-          totalRevenue,
-          pendingOrders,
-          deliveredOrders,
+          totalRevenue, pendingOrders, deliveredOrders,
         });
         setRecentOrders(Array.isArray(orders) ? orders.slice(0, 5) : []);
         setLoading(false);
       }
     };
-
     load();
     return () => { cancelled = true; };
   }, []);
@@ -87,35 +80,34 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-gray-400 mt-1">Welcome back! Here is your business overview.</p>
+        <p className="text-gray-400 mt-1 text-sm">Welcome back! Here is your business overview.</p>
       </div>
 
-    
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
         {statCards.map(({ label, value, icon: Icon, href, color, prefix }) => (
           <Link key={label} href={href}
-            className="bg-gray-800 border border-white/10 rounded-2xl p-5 hover:border-orange-500/30 transition-all group">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-xs">{label}</p>
-                <p className="text-2xl font-bold text-white mt-1">
+            className="bg-gray-800 border border-white/10 rounded-2xl p-4 hover:border-orange-500/30 transition-all group">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-gray-400 text-xs truncate">{label}</p>
+                <p className="text-xl font-bold text-white mt-1">
                   {loading ? <span className="animate-pulse text-gray-600">...</span> : `${prefix}${value}`}
                 </p>
               </div>
-              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}>
-                <Icon size={20} className="text-white" />
+              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}>
+                <Icon size={16} className="text-white" />
               </div>
             </div>
-            <p className="text-orange-400 text-xs mt-3 group-hover:underline">View →</p>
+            <p className="text-orange-400 text-xs mt-2 group-hover:underline">View →</p>
           </Link>
         ))}
       </div>
 
-      {/* Recent Orders */}
-      <div className="bg-gray-800 border border-white/10 rounded-2xl p-6 mb-6">
-        <div className="flex items-center justify-between mb-5">
+     
+      <div className="bg-gray-800 border border-white/10 rounded-2xl p-4 sm:p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <TrendingUp size={18} className="text-orange-400" />
             <h2 className="text-white font-semibold">Recent Orders</h2>
@@ -137,7 +129,7 @@ export default function AdminDashboard() {
               const Icon = STATUS_ICONS[order.deliveryStatus];
               return (
                 <div key={order.orderId}
-                  className="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl hover:bg-gray-700 transition-all">
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-700/50 rounded-xl hover:bg-gray-700 transition-all">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-orange-500/10 border border-orange-500/20 rounded-lg flex items-center justify-center shrink-0">
                       <Icon size={14} className="text-orange-400" />
@@ -147,7 +139,7 @@ export default function AdminDashboard() {
                       <p className="text-gray-400 text-xs">{order.customer.name}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 flex-wrap pl-11 sm:pl-0">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${STATUS_STYLES[order.deliveryStatus]}`}>
                       {order.deliveryStatus.replace(/-/g, " ")}
                     </span>
@@ -160,8 +152,8 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Quick Actions */}
-      <div className="bg-gray-800 border border-white/10 rounded-2xl p-6">
+      
+      <div className="bg-gray-800 border border-white/10 rounded-2xl p-4 sm:p-6">
         <h2 className="text-white font-semibold mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link href="/admin/meals"

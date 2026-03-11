@@ -122,7 +122,7 @@ export default function AdminUsers() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Users</h1>
           <p className="text-gray-400 text-sm mt-1">
@@ -160,81 +160,136 @@ export default function AdminUsers() {
           <p className="text-gray-500">{search ? "No users match your search." : "No users found."}</p>
         </div>
       ) : (
-        <div className="bg-gray-800 border border-white/10 rounded-2xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-gray-400 text-xs uppercase tracking-wider">
-                <th className="text-left px-4 py-3">User</th>
-                <th className="text-left px-4 py-3 hidden md:table-cell">Email</th>
-                <th className="text-left px-4 py-3">Role</th>
-                <th className="text-left px-4 py-3 hidden sm:table-cell">Joined</th>
-                <th className="text-right px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filtered.map((user) => {
-                const isCurrentUser = currentUser?.id === user._id;
-                const isUpdating = updating === user._id;
-                return (
-                  <tr key={user._id} className="hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-linear-to-br from-orange-500/40 to-amber-500/40 flex items-center justify-center text-orange-300 font-bold text-sm shrink-0">
-                          {user.firstName[0]}{user.lastName[0]}
+        <>
+         
+          <div className="sm:hidden space-y-3">
+            {filtered.map((user) => {
+              const isCurrentUser = currentUser?.id === user._id;
+              const isUpdating = updating === user._id;
+              return (
+                <div key={user._id} className="bg-gray-800 border border-white/10 rounded-2xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500/40 to-amber-500/40 flex items-center justify-center text-orange-300 font-bold text-sm shrink-0">
+                      {user.firstName[0]}{user.lastName[0]}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white font-medium text-sm truncate">
+                        {user.firstName} {user.lastName}
+                        {isCurrentUser && <span className="ml-2 text-xs text-orange-400">(you)</span>}
+                      </p>
+                      <p className="text-gray-500 text-xs truncate">{user.email}</p>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold shrink-0
+                      ${user.role === "admin"
+                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                        : "bg-white/5 text-gray-400 border border-white/10"}`}>
+                      {user.role === "admin" ? <Shield size={10} /> : <ShieldOff size={10} />}
+                      {user.role === "admin" ? "Admin" : "Customer"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-600 text-xs">
+                      {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => toggleRole(user)}
+                        disabled={isUpdating || isCurrentUser}
+                        className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40
+                          ${user.role === "admin"
+                            ? "bg-gray-700 text-gray-300 hover:bg-red-500/20 hover:text-red-400"
+                            : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"}`}>
+                        {isUpdating ? "..." : user.role === "admin" ? "Demote" : "Make Admin"}
+                      </button>
+                      <button
+                      title="o"
+                       onClick={() => deleteUser(user)}
+                        disabled={isUpdating || isCurrentUser}
+                        className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition disabled:opacity-40">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+       
+          <div className="hidden sm:block bg-gray-800 border border-white/10 rounded-2xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-gray-400 text-xs uppercase tracking-wider">
+                  <th className="text-left px-4 py-3">User</th>
+                  <th className="text-left px-4 py-3 hidden md:table-cell">Email</th>
+                  <th className="text-left px-4 py-3">Role</th>
+                  <th className="text-left px-4 py-3 hidden lg:table-cell">Joined</th>
+                  <th className="text-right px-4 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filtered.map((user) => {
+                  const isCurrentUser = currentUser?.id === user._id;
+                  const isUpdating = updating === user._id;
+                  return (
+                    <tr key={user._id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500/40 to-amber-500/40 flex items-center justify-center text-orange-300 font-bold text-sm shrink-0">
+                            {user.firstName[0]}{user.lastName[0]}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">
+                              {user.firstName} {user.lastName}
+                              {isCurrentUser && <span className="ml-2 text-xs text-orange-400 font-normal">(you)</span>}
+                            </p>
+                            <p className="text-gray-500 text-xs md:hidden">{user.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-white font-medium">
-                            {user.firstName} {user.lastName}
-                            {isCurrentUser && <span className="ml-2 text-xs text-orange-400 font-normal">(you)</span>}
-                          </p>
-                          <p className="text-gray-500 text-xs md:hidden">{user.email}</p>
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <span className="text-gray-400">{user.email}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
+                          ${user.role === "admin"
+                            ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                            : "bg-white/5 text-gray-400 border border-white/10"}`}>
+                          {user.role === "admin" ? <Shield size={11} /> : <ShieldOff size={11} />}
+                          {user.role === "admin" ? "Admin" : "Customer"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <span className="text-gray-500 text-xs">
+                          {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => toggleRole(user)}
+                            disabled={isUpdating || isCurrentUser}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed
+                              ${user.role === "admin"
+                                ? "bg-gray-700 text-gray-300 hover:bg-red-500/20 hover:text-red-400"
+                                : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"}`}>
+                            {isUpdating ? <span className="animate-pulse">...</span>
+                              : user.role === "admin" ? <><ShieldOff size={12} /> Demote</>
+                              : <><Shield size={12} /> Make Admin</>}
+                          </button>
+                          <button
+                          title="o" onClick={() => deleteUser(user)}
+                            disabled={isUpdating || isCurrentUser}
+                            className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed">
+                            <Trash2 size={14} />
+                          </button>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-gray-400">{user.email}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
-                        ${user.role === "admin"
-                          ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-                          : "bg-white/5 text-gray-400 border border-white/10"}`}>
-                        {user.role === "admin" ? <Shield size={11} /> : <ShieldOff size={11} />}
-                        {user.role === "admin" ? "Admin" : "Customer"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className="text-gray-500 text-xs">
-                        {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => toggleRole(user)}
-                          disabled={isUpdating || isCurrentUser}
-                          title={isCurrentUser ? "You cannot change your own role" : user.role === "admin" ? "Demote to Customer" : "Make Admin"}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed
-                            ${user.role === "admin"
-                              ? "bg-gray-700 text-gray-300 hover:bg-red-500/20 hover:text-red-400"
-                              : "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"}`}>
-                          {isUpdating ? <span className="animate-pulse">...</span>
-                            : user.role === "admin" ? <><ShieldOff size={12} /> Demote</>
-                            : <><Shield size={12} /> Make Admin</>}
-                        </button>
-                        <button onClick={() => deleteUser(user)}
-                          disabled={isUpdating || isCurrentUser}
-                          title={isCurrentUser ? "You cannot delete yourself" : "Delete user"}
-                          className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       <ConfirmModal

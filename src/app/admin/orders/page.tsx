@@ -5,33 +5,17 @@ import { Package, ChefHat, Truck, Home, ChevronDown, Loader2, RefreshCw, Eye } f
 import Link from "next/link";
 import ConfirmModal from "../components/ConfirmModal";
 
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-}
+interface OrderItem { name: string; quantity: number; price: number; }
 
 interface Order {
   orderId: string;
-  customer: {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    state: string;
-    zip: string;
-  };
+  customer: { name: string; email: string; phone: string; address: string; city: string; state: string; zip: string; };
   items: OrderItem[];
-  subtotal: number;
-  deliveryFee: number;
-  total: number;
+  subtotal: number; deliveryFee: number; total: number;
   deliveryStatus: "placed" | "preparing" | "out-for-delivery" | "delivered";
   paymentStatus: "pending" | "paid" | "failed";
-  deliveryDate: string;
-  deliveryTime: string;
-  specialInstructions?: string;
-  createdAt: string;
+  deliveryDate: string; deliveryTime: string;
+  specialInstructions?: string; createdAt: string;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -50,10 +34,7 @@ const PAYMENT_STYLES: Record<string, string> = {
 const DELIVERY_STEPS = ["placed", "preparing", "out-for-delivery", "delivered"];
 
 const STEP_ICONS: Record<string, React.ElementType> = {
-  placed: Package,
-  preparing: ChefHat,
-  "out-for-delivery": Truck,
-  delivered: Home,
+  placed: Package, preparing: ChefHat, "out-for-delivery": Truck, delivered: Home,
 };
 
 export default function AdminOrdersPage() {
@@ -74,29 +55,22 @@ export default function AdminOrdersPage() {
   };
 
   useEffect(() => {
-  let cancelled = false;
-
-  const load = async () => {
-    setLoading(true);
-    const res = await fetch("/api/orders", { credentials: "include" });
-    const data = await res.json();
-    if (!cancelled) {
-      setOrders(Array.isArray(data) ? data : []);
-      setLoading(false);
-    }
-  };
-
-  load();
-  return () => { cancelled = true; };
-}, []);
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      const res = await fetch("/api/orders", { credentials: "include" });
+      const data = await res.json();
+      if (!cancelled) { setOrders(Array.isArray(data) ? data : []); setLoading(false); }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdating(orderId);
     await fetch(`/api/orders/${orderId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ deliveryStatus: newStatus }),
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      credentials: "include", body: JSON.stringify({ deliveryStatus: newStatus }),
     });
     await fetchOrders();
     setUpdating(null);
@@ -111,14 +85,14 @@ export default function AdminOrdersPage() {
   const formatStatus = (s: string) => s.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div>
+      <div className="flex items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Orders</h1>
           <p className="text-gray-400 text-sm mt-1">{orders.length} total orders</p>
         </div>
         <button onClick={fetchOrders}
-          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-xl text-sm transition-all">
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-xl text-sm transition-all shrink-0">
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
@@ -143,60 +117,59 @@ export default function AdminOrdersPage() {
               <div key={order.orderId}
                 className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden">
 
-              
-                <div className="p-5 flex flex-wrap items-center gap-4">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center shrink-0">
-                      <Icon size={18} className="text-orange-400" />
+                <div className="p-4 sm:p-5">
+                 
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center shrink-0">
+                        <Icon size={16} className="text-orange-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-white font-bold font-mono text-sm">{order.orderId}</p>
+                        <p className="text-gray-400 text-xs truncate">{order.customer.name}</p>
+                        <p className="text-gray-500 text-xs truncate hidden sm:block">{order.customer.email}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-white font-bold font-mono">{order.orderId}</p>
-                      <p className="text-gray-400 text-sm truncate">{order.customer.name} · {order.customer.email}</p>
-                    </div>
+                    <button title="expand"
+                      onClick={() => setExpanded(isExpanded ? null : order.orderId)}
+                      className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all shrink-0">
+                      <ChevronDown size={14} className={`text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                    </button>
                   </div>
 
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border capitalize ${STATUS_STYLES[order.deliveryStatus]}`}>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${STATUS_STYLES[order.deliveryStatus]}`}>
                       {formatStatus(order.deliveryStatus)}
                     </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border capitalize ${PAYMENT_STYLES[order.paymentStatus]}`}>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${PAYMENT_STYLES[order.paymentStatus]}`}>
                       {order.paymentStatus}
                     </span>
-                    <span className="text-orange-400 font-bold">${order.total.toFixed(2)}</span>
+                    <span className="text-orange-400 font-bold text-sm ml-auto">${order.total.toFixed(2)}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    {next && (
+               
+                  <div>
+                    {next ? (
                       <button
                         disabled={updating === order.orderId}
                         onClick={() => setConfirmModal({
-                          open: true,
-                          orderId: order.orderId,
-                          newStatus: next,
+                          open: true, orderId: order.orderId, newStatus: next,
                           label: `Mark as "${formatStatus(next)}"?`,
                         })}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
+                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
                         {updating === order.orderId
                           ? <Loader2 size={12} className="animate-spin" />
                           : <Truck size={12} />}
                         {formatStatus(next)}
                       </button>
+                    ) : (
+                      <span className="text-green-400 text-xs font-semibold">✓ Delivered</span>
                     )}
-                    {order.deliveryStatus === "delivered" && (
-                      <span className="text-green-400 text-xs font-semibold px-3 py-2">✓ Delivered</span>
-                    )}
-                    <button
-                    title="o"
-                      onClick={() => setExpanded(isExpanded ? null : order.orderId)}
-                      className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all">
-                      <ChevronDown size={14} className={`text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
-                    </button>
                   </div>
                 </div>
 
                 {isExpanded && (
-                  <div className="border-t border-white/10 p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-                 
+                  <div className="border-t border-white/10 p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <h3 className="text-white font-semibold mb-3 text-sm">Order Items</h3>
                       <div className="space-y-2">
@@ -221,7 +194,6 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
 
-                    {/* Delivery info */}
                     <div>
                       <h3 className="text-white font-semibold mb-3 text-sm">Delivery Info</h3>
                       <div className="space-y-1.5 text-sm text-gray-400">

@@ -5,22 +5,16 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import {
-  LayoutDashboard,
-  UtensilsCrossed,
-  Tag,
-  LogOut,
-  Menu,
-  ChefHat,
-   Users,
-   ShoppingBag,
+  LayoutDashboard, UtensilsCrossed, Tag, LogOut, Menu, Users, ShoppingBag,
 } from "lucide-react";
+import Logo from "@/app/components/Logo";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/meals", label: "Meals", icon: UtensilsCrossed },
   { href: "/admin/categories", label: "Categories", icon: Tag },
   { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/orders", icon: ShoppingBag, label: "Orders" },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -54,10 +48,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className={`fixed top-0 left-0 h-full w-64 bg-gray-900 border-r border-white/10 z-30 flex flex-col
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}>
+
         <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-          <div className="w-9 h-9 rounded-xl bg-linear-to-br from-orange-500 to-amber-400 flex items-center justify-center">
-            <ChefHat size={20} className="text-white" />
-          </div>
+          <Logo className="h-9 w-9" />
           <div>
             <p className="text-white font-bold text-sm leading-tight">Cornerstone</p>
             <p className="text-orange-400 text-xs">Admin Panel</p>
@@ -80,33 +73,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <div className="px-4 py-4 border-t border-white/10">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm">
+            <div className="w-8 h-8 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm shrink-0">
               {user.firstName[0]}
             </div>
-            <div>
-              <p className="text-white text-sm font-medium">{user.firstName} {user.lastName}</p>
+            <div className="min-w-0">
+              <p className="text-white text-sm font-medium truncate">{user.firstName} {user.lastName}</p>
               <p className="text-gray-500 text-xs">Administrator</p>
             </div>
           </div>
           <button onClick={logout}
             className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all">
-            <LogOut size={16} />
-            Logout
+            <LogOut size={16} /> Logout
           </button>
         </div>
       </aside>
 
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 md:ml-64 flex flex-col min-h-screen min-w-0">
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-gray-900 border-b border-white/10 sticky top-0 z-10">
-          <button
-            title="Open Sidebar"
-           onClick={() => setSidebarOpen(true)} className="text-white p-1 rounded-lg hover:bg-white/10">
+          <button title="Open Sidebar" onClick={() => setSidebarOpen(true)}
+            className="text-white p-1 rounded-lg hover:bg-white/10">
             <Menu size={22} />
           </button>
           <span className="text-white font-semibold text-sm">Admin Panel</span>
           <div className="w-8" />
         </header>
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 overflow-auto min-w-0">{children}</main>
       </div>
     </div>
   );
