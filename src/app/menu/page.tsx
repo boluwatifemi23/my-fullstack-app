@@ -52,7 +52,7 @@ export default async function MenuIndexPage() {
 
   return (
     <main className="min-h-screen bg-gray-950 relative overflow-hidden">
-      {/* Animated background blobs */}
+    
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/8 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-600/8 rounded-full blur-3xl animate-pulse delay-700" />
@@ -61,7 +61,7 @@ export default async function MenuIndexPage() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16">
 
-        {/* Header */}
+      
         <div className="mb-12">
           <span className="inline-block px-4 py-1.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm font-semibold rounded-full mb-4">
             Our Menu
@@ -72,7 +72,7 @@ export default async function MenuIndexPage() {
           </p>
         </div>
 
-        {/* Categories */}
+       
         <section className="mb-16">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-2xl font-bold text-white">Browse by Category</h2>
@@ -80,7 +80,7 @@ export default async function MenuIndexPage() {
           <CategoriesCarousel categories={categories} />
         </section>
 
-        {/* All categories grid */}
+       
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-white mb-5">All Categories</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -94,7 +94,6 @@ export default async function MenuIndexPage() {
           </div>
         </section>
 
-        {/* Featured */}
         <section>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-2xl font-bold text-white">Featured Meals</h2>
