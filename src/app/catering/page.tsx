@@ -10,14 +10,14 @@ const packages = [
   {
     name: "Small Gathering",
     guests: "Up to 30 guests",
-    price: "From $150,000",
+    price: "From $1,000",
     features: ["2 rice dishes", "1 protein option", "1 salad", "Small chops", "Drinks"],
     highlight: false,
   },
   {
     name: "Mid-Size Event",
     guests: "30–100 guests",
-    price: "From $400,000",
+    price: "From $5,000",
     features: ["3 rice dishes", "2 protein options", "2 soups/stews", "Small chops", "Salads", "Drinks & dessert"],
     highlight: true,
   },
@@ -33,7 +33,7 @@ const packages = [
 export default function CateringPage() {
   return (
     <main>
-      {/* Hero */}
+     
       <section className="relative h-80 overflow-hidden">
         <Image src="/images/jollofrice2.jpg" alt="Catering" fill className="object-cover" />
         <div className="absolute inset-0 bg-black/55" />
@@ -49,7 +49,7 @@ export default function CateringPage() {
       </section>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
-        {/* What we offer */}
+        
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-10">What We Offer</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -70,7 +70,7 @@ export default function CateringPage() {
           </div>
         </section>
 
-        {/* Packages */}
+      
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-10">Catering Packages</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -99,7 +99,7 @@ export default function CateringPage() {
           </div>
         </section>
 
-        {/* CTA */}
+       
         <section className="bg-gray-900 rounded-2xl p-10 text-center text-white">
           <h2 className="text-2xl font-bold mb-3">Have a Custom Event?</h2>
           <p className="text-gray-400 mb-6 max-w-md mx-auto">Tell us about your event and we&apos;ll create a custom catering package just for you.</p>
