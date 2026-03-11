@@ -24,12 +24,18 @@ export default function Hero() {
   const [bgIdx, setBgIdx] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setPhraseIdx((i) => (i + 1) % PHRASES.length), 3000);
+    const t = setInterval(
+      () => setPhraseIdx((i) => (i + 1) % PHRASES.length),
+      3000,
+    );
     return () => clearInterval(t);
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setBgIdx((i) => (i + 1) % BG_IMAGES.length), 4000);
+    const t = setInterval(
+      () => setBgIdx((i) => (i + 1) % BG_IMAGES.length),
+      4000,
+    );
     return () => clearInterval(t);
   }, []);
 
@@ -39,10 +45,18 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden w-full" style={{ minHeight: "100svh" }}>
+    <section
+      className="relative overflow-hidden w-full"
+      style={{ minHeight: "100svh" }}
+    >
       <div className="absolute inset-0 w-full h-full">
         {BG_IMAGES.map((src, idx) => (
-          <Image key={idx} src={src} alt="" fill priority
+          <Image
+            key={idx}
+            src={src}
+            alt=""
+            fill
+            priority
             className={`object-cover transition-opacity duration-1000 ease-in-out ${idx === bgIdx ? "opacity-100" : "opacity-0"}`}
           />
         ))}
@@ -58,27 +72,40 @@ export default function Hero() {
         </h1>
 
         <p className="mt-6 text-base sm:text-lg max-w-xl drop-shadow">
-          Savor authentic African & Nigerian meals prepared fresh and delivered across the USA.
-          We also offer full-service catering for events, corporate functions, and celebrations.
+          Savor authentic African & Nigerian meals prepared fresh and delivered
+          across the USA. We also offer full-service catering for events,
+          corporate functions, and celebrations.
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center lg:justify-start">
-          <button type="button" onClick={() => scrollToSection("menu-section")}
-            className="w-full sm:w-auto px-8 py-3 bg-orange-600 text-white rounded-lg font-semibold shadow hover:bg-orange-700 transition">
+          <Link
+            href="/menu"
+            className="w-full sm:w-auto px-8 py-3 bg-orange-600 text-white rounded-lg font-semibold shadow hover:bg-orange-700 transition text-center"
+          >
             Explore Menu
-          </button>
-          <Link href="/catering"
-            className="w-full sm:w-auto px-8 py-3 rounded-lg bg-white text-gray-900 font-semibold hover:bg-gray-100 transition text-center">
+          </Link>
+          <Link
+            href="/catering"
+            className="w-full sm:w-auto px-8 py-3 rounded-lg bg-white text-gray-900 font-semibold hover:bg-gray-100 transition text-center"
+          >
             Catering Services
           </Link>
         </div>
 
         <div className="mt-8 inline-flex items-center gap-4">
-          <Image src="/images/chef.jpg" alt="Meet the chef" width={72} height={72}
-            className="rounded-full object-cover shadow-md" />
+          <Image
+            src="/images/chef.jpg"
+            alt="Meet the chef"
+            width={72}
+            height={72}
+            className="rounded-full object-cover shadow-md"
+          />
           <div>
             <p className="text-sm text-gray-200">Meet the Chef</p>
-            <Link href="/chef" className="text-sm font-semibold text-orange-400 hover:underline">
+            <Link
+              href="/chef"
+              className="text-sm font-semibold text-orange-400 hover:underline"
+            >
               See Bio →
             </Link>
           </div>
