@@ -1,11 +1,10 @@
-
 import { Types } from "mongoose";
 
 export interface LeanCategoryDoc {
   _id: Types.ObjectId;
   name: string;
   slug: string;
-   image?: string;
+  image?: string;
   description?: string;
   order?: number;
   createdAt?: Date;
@@ -20,6 +19,7 @@ export interface LeanMealDoc {
   category: string;
   image?: string;
   description?: string;
+  variants?: { label: string; price: number }[];
   createdAt?: Date;
   updatedAt?: Date;
   __v?: number;

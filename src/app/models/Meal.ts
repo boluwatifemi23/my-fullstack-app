@@ -1,5 +1,10 @@
 import { Schema, model, models } from "mongoose";
 
+export interface MealVariant {
+  label: string;
+  price: number;
+}
+
 export interface MealType {
   _id: string;
   name: string;
@@ -7,7 +12,13 @@ export interface MealType {
   category: string;
   image?: string;
   description?: string;
+  variants?: MealVariant[];
 }
+
+const VariantSchema = new Schema<MealVariant>({
+  label: { type: String, required: true },
+  price: { type: Number, required: true },
+}, { _id: false });
 
 const MealSchema = new Schema<MealType>(
   {
@@ -16,6 +27,7 @@ const MealSchema = new Schema<MealType>(
     category: { type: String, required: true },
     image: { type: String },
     description: { type: String },
+    variants: { type: [VariantSchema], default: [] },
   },
   { timestamps: true }
 );

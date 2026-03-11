@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 export default function CartPage() {
   const { items, clear, addToCart, removeFromCart, decreaseQuantity } = useCart();
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
   const router = useRouter();
 
   if (items.length === 0) {
@@ -21,14 +20,13 @@ export default function CartPage() {
           <div className="absolute -bottom-20 -right-20 w-[450px] h-[450px] bg-amber-500/20 rounded-full blur-3xl animate-pulse delay-700" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-orange-500/15 rounded-full blur-3xl animate-pulse delay-500" />
         </div>
-
         <div className="relative text-center max-w-sm">
           <div className="w-24 h-24 mx-auto mb-6 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
             <ShoppingBag size={40} className="text-orange-400" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Your cart is empty</h1>
           <p className="text-gray-400 mb-6">Looks like you haven&apos;t added any meals yet.</p>
-          <Link href="/"
+          <Link href="/menu"
             className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium transition-all">
             <ArrowLeft size={18} /> Browse Menu
           </Link>
@@ -48,7 +46,7 @@ export default function CartPage() {
 
       <div className="relative max-w-4xl mx-auto px-4 py-10">
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/" className="text-gray-400 hover:text-orange-500 transition p-2 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10">
+          <Link href="/menu" className="text-gray-400 hover:text-orange-500 transition p-2 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10">
             <ArrowLeft size={18} />
           </Link>
           <div>
@@ -60,7 +58,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-3">
             {items.map((item) => (
-              <div key={item._id}
+              <div key={item.cartKey}
                 className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-4 flex gap-4 hover:bg-white/8 transition-all duration-200">
                 <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-gray-800 border border-white/10">
                   {item.image ? (
@@ -72,23 +70,27 @@ export default function CartPage() {
 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-white truncate">{item.name}</h3>
+                  {item.selectedVariant && (
+                    <p className="text-xs text-orange-400 font-medium">{item.selectedVariant.label}</p>
+                  )}
                   <p className="text-sm text-gray-400 capitalize">{item.category.replace(/-/g, " ")}</p>
                   <p className="text-orange-400 font-bold mt-1">${item.price.toLocaleString()}</p>
                 </div>
 
                 <div className="flex flex-col items-end justify-between">
                   <button title="Remove item"
-                    onClick={() => { removeFromCart(item._id); toast.success(`${item.name} removed`); }}
+                    onClick={() => { removeFromCart(item.cartKey); toast.success(`${item.name} removed`); }}
                     className="text-gray-500 hover:text-red-400 transition p-1 rounded-lg hover:bg-red-400/10">
                     <Trash2 size={15} />
                   </button>
                   <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-2 py-1">
-                    <button title="Decrease quantity" onClick={() => decreaseQuantity(item._id)}
+                    <button title="Decrease quantity" onClick={() => decreaseQuantity(item.cartKey)}
                       className="text-gray-400 hover:text-orange-400 transition">
                       <Minus size={13} />
                     </button>
                     <span className="w-6 text-center font-bold text-white text-sm">{item.quantity}</span>
-                    <button title="Increase quantity" onClick={() => addToCart(item)}
+                    <button title="Increase quantity"
+                      onClick={() => addToCart(item, item.selectedVariant ?? undefined)}
                       className="text-gray-400 hover:text-orange-400 transition">
                       <Plus size={13} />
                     </button>
@@ -108,8 +110,10 @@ export default function CartPage() {
               <h2 className="font-bold text-white text-lg mb-4">Order Summary</h2>
               <div className="space-y-2 text-sm mb-4">
                 {items.map((item) => (
-                  <div key={item._id} className="flex justify-between text-gray-400">
-                    <span className="truncate mr-2">{item.name} × {item.quantity}</span>
+                  <div key={item.cartKey} className="flex justify-between text-gray-400">
+                    <span className="truncate mr-2">
+                      {item.name}{item.selectedVariant ? ` (${item.selectedVariant.label})` : ""} × {item.quantity}
+                    </span>
                     <span className="text-white font-medium shrink-0">${(item.price * item.quantity).toLocaleString()}</span>
                   </div>
                 ))}
@@ -122,13 +126,12 @@ export default function CartPage() {
                 <p className="text-xs text-gray-500 mt-1">Delivery fees calculated at checkout</p>
               </div>
 
-              <button
-                onClick={() => router.push("/checkout")}
+              <button onClick={() => router.push("/checkout")}
                 className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all shadow-lg shadow-orange-500/20 active:scale-95">
                 Proceed to Checkout
               </button>
 
-              <Link href="/"
+              <Link href="/menu"
                 className="block text-center text-sm text-gray-500 hover:text-orange-400 mt-3 transition">
                 ← Continue Shopping
               </Link>

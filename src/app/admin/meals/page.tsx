@@ -14,9 +14,19 @@ type Meal = {
   category: string;
   image?: string;
   description?: string;
+  variants?: { label: string; price: number }[];
 };
 
-const emptyForm = { name: "", price: "", category: "", image: "", description: "" };
+const emptyForm = {
+  name: "",
+  price: "",
+  category: "",
+  image: "",
+  description: "",
+  variants: [] as { label: string; price: string }[],
+};
+
+type FormState = typeof emptyForm;
 
 type ConfirmState = {
   open: boolean;
@@ -31,7 +41,7 @@ export default function AdminMeals() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -71,7 +81,13 @@ export default function AdminMeals() {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = { ...form, price: Number(form.price) };
+      const payload = {
+        ...form,
+        price: Number(form.price),
+        variants: form.variants
+          .filter((v) => v.label && v.price)
+          .map((v) => ({ label: v.label, price: Number(v.price) })),
+      };
       const url = editingId ? `/api/meals/${editingId}` : "/api/meals";
       const method = editingId ? "PUT" : "POST";
       const res = await fetch(url, {
@@ -102,12 +118,32 @@ export default function AdminMeals() {
   }
 
   function openEdit(meal: Meal) {
-    setForm({ name: meal.name, price: String(meal.price), category: meal.category, image: meal.image || "", description: meal.description || "" });
+    setForm({
+      name: meal.name,
+      price: String(meal.price),
+      category: meal.category,
+      image: meal.image || "",
+      description: meal.description || "",
+      variants: (meal.variants || []).map((v) => ({ label: v.label, price: String(v.price) })),
+    });
     setEditingId(meal._id);
     setShowForm(true);
   }
 
   function openNew() { setForm(emptyForm); setEditingId(null); setShowForm(true); }
+
+  function addVariant() {
+    setForm((f) => ({ ...f, variants: [...f.variants, { label: "", price: "" }] }));
+  }
+
+  function updateVariant(idx: number, field: "label" | "price", value: string) {
+    const updated = form.variants.map((v, i) => i === idx ? { ...v, [field]: value } : v);
+    setForm((f) => ({ ...f, variants: updated }));
+  }
+
+  function removeVariant(idx: number) {
+    setForm((f) => ({ ...f, variants: f.variants.filter((_, i) => i !== idx) }));
+  }
 
   const filtered = meals.filter(
     (m) => m.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -134,41 +170,99 @@ export default function AdminMeals() {
           className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
       </div>
 
+      {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <h2 className="text-white font-semibold text-lg">{editingId ? "Edit Meal" : "Add New Meal"}</h2>
-              <button title="Close" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
+              <button title="Close form" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
                 className="text-gray-400 hover:text-white transition"><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
+
+              {/* Name */}
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Meal Name *</label>
                 <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. Jollof Rice"
                   className="w-full px-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
               </div>
+
+              {/* Base Price */}
               <div>
-                <label className="text-gray-300 text-sm font-medium block mb-1">Price ($) *</label>
-                <input required type="number" min="0" value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                  placeholder="e.g. 2500"
+                <label className="text-gray-300 text-sm font-medium block mb-1">
+                  Base Price ($) * <span className="text-gray-500 font-normal">(used if no variants)</span>
+                </label>
+                <input required type="number" min="0" value={form.price}
+                  onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                  placeholder="e.g. 120"
                   className="w-full px-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
               </div>
+
+              {/* Variants */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-gray-300 text-sm font-medium">
+                    Price Variants <span className="text-gray-500 font-normal text-xs">(e.g. ½ pan, Full pan)</span>
+                  </label>
+                  <button type="button" title="Add variant" onClick={addVariant}
+                    className="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition">
+                    <Plus size={12} /> Add Variant
+                  </button>
+                </div>
+
+                {form.variants.length === 0 ? (
+                  <p className="text-gray-600 text-xs italic">No variants — single base price will be used.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {form.variants.map((v, idx) => (
+                      <div key={idx} className="flex gap-2 items-center">
+                        <input
+                          placeholder="Label (e.g. ½ pan)"
+                          value={v.label}
+                          onChange={(e) => updateVariant(idx, "label", e.target.value)}
+                          className="flex-1 px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50"
+                        />
+                        <input
+                          placeholder="Price"
+                          type="number"
+                          min="0"
+                          value={v.price}
+                          onChange={(e) => updateVariant(idx, "price", e.target.value)}
+                          className="w-24 px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50"
+                        />
+                        <button type="button" title="Remove variant" onClick={() => removeVariant(idx)}
+                          className="p-2 text-gray-500 hover:text-red-400 transition">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Category */}
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Category *</label>
-                <select title="Category" required value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                <select title="Select category" required value={form.category}
+                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
                   className="w-full px-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500/50">
                   <option value="">Select a category</option>
                   {categories.map((cat) => <option key={cat._id} value={cat.slug}>{cat.name}</option>)}
                 </select>
               </div>
+
+              {/* Description */}
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Description</label>
-                <textarea rows={3} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="Describe the meal..."
+                <textarea rows={3} value={form.description}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  placeholder="Tell customers about this dish..."
                   className="w-full px-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50 resize-none" />
               </div>
+
+              {/* Image */}
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Image</label>
                 <input title="Upload image" type="file" accept="image/*" onChange={handleImageUpload}
@@ -180,8 +274,11 @@ export default function AdminMeals() {
                   </div>
                 )}
               </div>
+
+              {/* Buttons */}
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
+                <button type="button"
+                  onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
                   className="flex-1 py-2.5 rounded-xl border border-white/20 text-gray-300 text-sm hover:bg-white/5 transition">
                   Cancel
                 </button>
@@ -195,6 +292,7 @@ export default function AdminMeals() {
         </div>
       )}
 
+      {/* List */}
       {loading ? (
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-gray-800 rounded-xl animate-pulse" />)}
@@ -205,7 +303,7 @@ export default function AdminMeals() {
         </div>
       ) : (
         <>
-       
+          {/* Mobile cards */}
           <div className="sm:hidden space-y-3">
             {filtered.map((meal) => (
               <div key={meal._id} className="bg-gray-800 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
@@ -217,16 +315,20 @@ export default function AdminMeals() {
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-medium text-sm truncate">{meal.name}</p>
                   <p className="text-gray-500 text-xs capitalize">{meal.category.replace(/-/g, " ")}</p>
-                  <p className="text-orange-400 font-bold text-sm mt-0.5">${meal.price.toLocaleString()}</p>
+                  {meal.variants && meal.variants.length > 0 ? (
+                    <p className="text-orange-400 text-xs mt-0.5">
+                      From ${Math.min(...meal.variants.map(v => v.price))}
+                    </p>
+                  ) : (
+                    <p className="text-orange-400 font-bold text-sm mt-0.5">${meal.price.toLocaleString()}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <button
-                  title="edit"
-                   onClick={() => openEdit(meal)}
+                  <button onClick={() => openEdit(meal)} title="Edit meal"
                     className="p-2 text-gray-400 hover:text-orange-400 hover:bg-orange-400/10 rounded-lg transition">
                     <Pencil size={15} />
                   </button>
-                  <button title="delete" onClick={() => handleDelete(meal._id, meal.name)}
+                  <button onClick={() => handleDelete(meal._id, meal.name)} title="Delete meal"
                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition">
                     <Trash2 size={15} />
                   </button>
@@ -235,7 +337,7 @@ export default function AdminMeals() {
             ))}
           </div>
 
-        
+          {/* Desktop table */}
           <div className="hidden sm:block bg-gray-800 border border-white/10 rounded-2xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
@@ -267,14 +369,18 @@ export default function AdminMeals() {
                         {meal.category.replace(/-/g, " ")}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-white font-semibold">${meal.price.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-white font-semibold">
+                      {meal.variants && meal.variants.length > 0
+                        ? <span className="text-orange-400">From ${Math.min(...meal.variants.map(v => v.price))}</span>
+                        : `$${meal.price.toLocaleString()}`}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openEdit(meal)} title="Edit Meal"
+                        <button onClick={() => openEdit(meal)} title="Edit meal"
                           className="p-1.5 text-gray-400 hover:text-orange-400 hover:bg-orange-400/10 rounded-lg transition">
                           <Pencil size={15} />
                         </button>
-                        <button onClick={() => handleDelete(meal._id, meal.name)} title="Delete Meal"
+                        <button onClick={() => handleDelete(meal._id, meal.name)} title="Delete meal"
                           className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition">
                           <Trash2 size={15} />
                         </button>

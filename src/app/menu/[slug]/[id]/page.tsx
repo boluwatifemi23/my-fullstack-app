@@ -19,30 +19,34 @@ export default async function MealDetailPage({ params }: Props) {
     description?: string;
     image?: string;
     category: string;
+    variants?: { label: string; price: number }[];
   } | null;
 
   if (!meal) notFound();
 
+  const hasVariants = meal.variants && meal.variants.length > 0;
+  const displayPrice = hasVariants
+    ? `From $${Math.min(...meal.variants!.map(v => v.price))}`
+    : `$${meal.price}`;
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 px-4">
       <div className="max-w-3xl mx-auto">
-
-             <Link href={`/menu/${slug}`}
+        <Link href={`/menu/${slug}`}
           className="inline-flex items-center gap-1.5 text-orange-500 hover:text-orange-600 text-sm font-medium mb-6 transition">
           <ChevronLeft size={16} /> Back to {slug.replace(/-/g, " ")}
         </Link>
 
         <div className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-xl border border-gray-100 dark:border-white/10">
-
           <div className="relative w-full h-72 sm:h-96 bg-gray-100 dark:bg-gray-800">
             {meal.image ? (
-              <Image src={meal.image} alt={meal.name} fill className="object-cover" priority sizes="(max-width: 768px) 100vw, 800px" />
+              <Image src={meal.image} alt={meal.name} fill className="object-cover" priority
+                sizes="(max-width: 768px) 100vw, 800px" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-8xl">🍽️</div>
             )}
           </div>
 
-        
           <div className="p-6 sm:p-8">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
@@ -52,11 +56,13 @@ export default async function MealDetailPage({ params }: Props) {
                   {slug.replace(/-/g, " ")}
                 </Link>
               </div>
-              <span className="text-3xl font-extrabold text-orange-500">${meal.price}</span>
+              <span className="text-2xl font-extrabold text-orange-500">{displayPrice}</span>
             </div>
 
             {meal.description && (
-              <p className="mt-5 text-gray-600 dark:text-gray-400 leading-relaxed text-base">{meal.description}</p>
+              <p className="mt-5 text-gray-600 dark:text-gray-400 leading-relaxed text-base">
+                {meal.description}
+              </p>
             )}
 
             <div className="mt-8">
@@ -67,6 +73,7 @@ export default async function MealDetailPage({ params }: Props) {
                 category: meal.category,
                 image: meal.image,
                 description: meal.description,
+                variants: meal.variants ?? [],
               }} />
             </div>
           </div>
