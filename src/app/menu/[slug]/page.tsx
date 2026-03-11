@@ -62,7 +62,7 @@ export default async function CategoryPage({ params }: Props) {
   const { category, meals } = data;
 
   return (
-    <section className="max-w-6xl mx-auto px-6 py-12">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
       <div className="mb-6">
         <Link
           href="/menu"

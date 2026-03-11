@@ -37,7 +37,7 @@ export default function MenuSection() {
   }
 
   return (
-    <section className="py-16 max-w-7xl mx-auto px-6" id="menu">
+    <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6" id="menu">
 
      
       <div className="mb-12">

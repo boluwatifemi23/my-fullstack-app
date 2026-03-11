@@ -8,7 +8,7 @@ export default function MeetTheChef() {
       id="chef"
       className="py-24 bg-linear-to-br from-orange-300 via-orange-400 via-white to-[#ffebd6]"
     >
-      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-16 items-center">
         <motion.img
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}

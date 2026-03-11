@@ -59,7 +59,7 @@ export default async function MenuIndexPage() {
         <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-orange-700/6 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 py-16">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16">
 
         {/* Header */}
         <div className="mb-12">

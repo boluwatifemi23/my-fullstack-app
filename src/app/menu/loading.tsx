@@ -1,6 +1,6 @@
 export default function MenuLoading() {
   return (
-    <main className="max-w-7xl mx-auto px-6 py-12">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
       <header className="mb-8">
         <div className="h-10 w-64 bg-linear-to-r from-orange-300 to-amber-400 rounded-lg animate-pulse" />
         <div className="mt-3 h-4 w-80 bg-gray-200 rounded animate-pulse" />

@@ -48,7 +48,7 @@ export default function CateringPage() {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-6 py-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
         {/* What we offer */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-10">What We Offer</h2>

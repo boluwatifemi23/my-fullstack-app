@@ -10,7 +10,7 @@ export default function TrackOrderSearchPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     const trimmed = orderId.trim().toUpperCase();
     if (!trimmed) return;

@@ -40,7 +40,7 @@ export default function ContactPage() {
         <div className="absolute top-1/3 right-0 w-[350px] h-[350px] bg-red-500/6 rounded-full blur-3xl animate-pulse delay-500" />
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-6 py-16">
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-16">
       
         <div className="text-center mb-12">
           <span className="inline-block px-4 py-1.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm font-semibold rounded-full mb-4">
