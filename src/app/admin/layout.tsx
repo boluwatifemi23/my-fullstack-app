@@ -7,7 +7,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import {
   LayoutDashboard, UtensilsCrossed, Tag, LogOut, Menu, Users, ShoppingBag,
 } from "lucide-react";
-import Logo from "@/app/components/Logo";
+
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -50,7 +50,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}>
 
         <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-          <Logo className="h-9 w-9" />
+          <svg className="h-9 w-9 shrink-0" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="0" width="64" height="64" rx="12" fill="#f54a00" />
+            <path d="M18 34c0-6 7-10 14-10s14 4 14 10v6H18v-6z" fill="#FFF" opacity="0.98"/>
+            <circle cx="32" cy="22" r="6" fill="#fff" opacity="0.98"/>
+          </svg>
           <div>
             <p className="text-white font-bold text-sm leading-tight">Cornerstone</p>
             <p className="text-orange-400 text-xs">Admin Panel</p>
