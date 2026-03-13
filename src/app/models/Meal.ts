@@ -13,6 +13,7 @@ export interface MealType {
   image?: string;
   description?: string;
   variants?: MealVariant[];
+  featured?: boolean;
 }
 
 const VariantSchema = new Schema<MealVariant>({
@@ -28,6 +29,7 @@ const MealSchema = new Schema<MealType>(
     image: { type: String },
     description: { type: String },
     variants: { type: [VariantSchema], default: [] },
+    featured: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

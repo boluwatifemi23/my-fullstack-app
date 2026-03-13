@@ -1,6 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import Hero from "./components/Hero";
+import FeaturedMeals from "./components/FeaturedMeals";
 
 
 
@@ -14,6 +15,7 @@ export default function Page() {
     <>
      
       <Hero />
+       <FeaturedMeals />
       <MenuSectionClient />
     </>
   );

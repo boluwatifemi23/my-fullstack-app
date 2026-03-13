@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { Pencil, Trash2, Plus, X, Search } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Search, Star } from "lucide-react";
 import ConfirmModal from "../components/ConfirmModal";
 
 type Category = { _id: string; name: string; slug: string };
@@ -15,6 +15,7 @@ type Meal = {
   image?: string;
   description?: string;
   variants?: { label: string; price: number }[];
+  featured?: boolean;
 };
 
 const emptyForm = {
@@ -24,6 +25,7 @@ const emptyForm = {
   image: "",
   description: "",
   variants: [] as { label: string; price: string }[],
+  featured: false,
 };
 
 type FormState = typeof emptyForm;
@@ -102,6 +104,21 @@ export default function AdminMeals() {
     finally { setSaving(false); }
   }
 
+  async function toggleFeatured(meal: Meal) {
+    try {
+      const res = await fetch(`/api/meals/${meal._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ featured: !meal.featured }),
+      });
+      if (res.ok) {
+        setMeals((prev) => prev.map((m) => m._id === meal._id ? { ...m, featured: !m.featured } : m));
+        toast.success(!meal.featured ? "⭐ Marked as featured!" : "Removed from featured");
+      }
+    } catch { toast.error("Failed to update"); }
+  }
+
   function handleDelete(id: string, name: string) {
     setConfirmModal({
       open: true, title: "Delete Meal",
@@ -125,6 +142,7 @@ export default function AdminMeals() {
       image: meal.image || "",
       description: meal.description || "",
       variants: (meal.variants || []).map((v) => ({ label: v.label, price: String(v.price) })),
+      featured: meal.featured ?? false,
     });
     setEditingId(meal._id);
     setShowForm(true);
@@ -155,7 +173,9 @@ export default function AdminMeals() {
       <div className="flex items-center justify-between mb-6 gap-4">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold text-white">Meals</h1>
-          <p className="text-gray-400 text-sm mt-1">{meals.length} meals in the menu</p>
+          <p className="text-gray-400 text-sm mt-1">
+            {meals.length} meals · {meals.filter(m => m.featured).length} featured
+          </p>
         </div>
         <button onClick={openNew}
           className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition-all shrink-0">
@@ -170,18 +190,18 @@ export default function AdminMeals() {
           className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
       </div>
 
-      {/* Form Modal */}
+     
       {showForm && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <h2 className="text-white font-semibold text-lg">{editingId ? "Edit Meal" : "Add New Meal"}</h2>
-              <button title="Close form" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
+              <button title="Close form" aria-label="Close form" onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
                 className="text-gray-400 hover:text-white transition"><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
 
-              {/* Name */}
+           
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Meal Name *</label>
                 <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -189,7 +209,7 @@ export default function AdminMeals() {
                   className="w-full px-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
               </div>
 
-              {/* Base Price */}
+            
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">
                   Base Price ($) * <span className="text-gray-500 font-normal">(used if no variants)</span>
@@ -200,49 +220,38 @@ export default function AdminMeals() {
                   className="w-full px-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
               </div>
 
-              {/* Variants */}
+           
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-gray-300 text-sm font-medium">
                     Price Variants <span className="text-gray-500 font-normal text-xs">(e.g. ½ pan, Full pan)</span>
                   </label>
-                  <button type="button" title="Add variant" onClick={addVariant}
+                  <button type="button" title="Add variant" aria-label="Add variant" onClick={addVariant}
                     className="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition">
                     <Plus size={12} /> Add Variant
                   </button>
                 </div>
-
                 {form.variants.length === 0 ? (
                   <p className="text-gray-600 text-xs italic">No variants — single base price will be used.</p>
                 ) : (
                   <div className="space-y-2">
                     {form.variants.map((v, idx) => (
                       <div key={idx} className="flex gap-2 items-center">
-                        <input
-                          placeholder="Label (e.g. ½ pan)"
-                          value={v.label}
+                        <input placeholder="Label (e.g. ½ pan)" value={v.label}
                           onChange={(e) => updateVariant(idx, "label", e.target.value)}
-                          className="flex-1 px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50"
-                        />
-                        <input
-                          placeholder="Price"
-                          type="number"
-                          min="0"
-                          value={v.price}
+                          className="flex-1 px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
+                        <input placeholder="Price" type="number" min="0" value={v.price}
                           onChange={(e) => updateVariant(idx, "price", e.target.value)}
-                          className="w-24 px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50"
-                        />
-                        <button type="button" title="Remove variant" onClick={() => removeVariant(idx)}
-                          className="p-2 text-gray-500 hover:text-red-400 transition">
-                          <X size={14} />
-                        </button>
+                          className="w-24 px-3 py-2 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50" />
+                        <button type="button" title="Remove variant" aria-label="Remove variant" onClick={() => removeVariant(idx)}
+                          className="p-2 text-gray-500 hover:text-red-400 transition"><X size={14} /></button>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Category */}
+           
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Category *</label>
                 <select title="Select category" required value={form.category}
@@ -253,7 +262,7 @@ export default function AdminMeals() {
                 </select>
               </div>
 
-              {/* Description */}
+          
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Description</label>
                 <textarea rows={3} value={form.description}
@@ -262,7 +271,7 @@ export default function AdminMeals() {
                   className="w-full px-4 py-2.5 bg-gray-800 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500/50 resize-none" />
               </div>
 
-              {/* Image */}
+          
               <div>
                 <label className="text-gray-300 text-sm font-medium block mb-1">Image</label>
                 <input title="Upload image" type="file" accept="image/*" onChange={handleImageUpload}
@@ -275,7 +284,33 @@ export default function AdminMeals() {
                 )}
               </div>
 
-              {/* Buttons */}
+             
+              <div className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+                form.featured ? "bg-yellow-500/10 border-yellow-500/30" : "bg-gray-800 border-white/10"
+              }`}>
+                <div>
+                  <p className="text-sm font-medium text-white flex items-center gap-1.5">
+                    <Star size={14} className={form.featured ? "text-yellow-400 fill-yellow-400" : "text-gray-500"} />
+                    Featured Meal
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">Show on homepage featured section</p>
+                </div>
+                <button
+                  type="button"
+                  title={form.featured ? "Remove from featured" : "Mark as featured"}
+                  aria-label={form.featured ? "Remove from featured" : "Mark as featured"}
+                  onClick={() => setForm((f) => ({ ...f, featured: !f.featured }))}
+                  className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
+                    form.featured ? "bg-yellow-500" : "bg-gray-600"
+                  }`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                    form.featured ? "translate-x-5" : "translate-x-0"
+                  }`} />
+                </button>
+              </div>
+
+          
               <div className="flex gap-3 pt-2">
                 <button type="button"
                   onClick={() => { setShowForm(false); setEditingId(null); setForm(emptyForm); }}
@@ -292,7 +327,7 @@ export default function AdminMeals() {
         </div>
       )}
 
-      {/* List */}
+   
       {loading ? (
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-gray-800 rounded-xl animate-pulse" />)}
@@ -303,7 +338,7 @@ export default function AdminMeals() {
         </div>
       ) : (
         <>
-          {/* Mobile cards */}
+      
           <div className="sm:hidden space-y-3">
             {filtered.map((meal) => (
               <div key={meal._id} className="bg-gray-800 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
@@ -313,22 +348,27 @@ export default function AdminMeals() {
                     : <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">N/A</div>}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium text-sm truncate">{meal.name}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-white font-medium text-sm truncate">{meal.name}</p>
+                    {meal.featured && <Star size={12} className="text-yellow-400 fill-yellow-400 shrink-0" />}
+                  </div>
                   <p className="text-gray-500 text-xs capitalize">{meal.category.replace(/-/g, " ")}</p>
                   {meal.variants && meal.variants.length > 0 ? (
-                    <p className="text-orange-400 text-xs mt-0.5">
-                      From ${Math.min(...meal.variants.map(v => v.price))}
-                    </p>
+                    <p className="text-orange-400 text-xs mt-0.5">From ${Math.min(...meal.variants.map(v => v.price))}</p>
                   ) : (
                     <p className="text-orange-400 font-bold text-sm mt-0.5">${meal.price.toLocaleString()}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={() => openEdit(meal)} title="Edit meal"
+                  <button onClick={() => toggleFeatured(meal)} title={meal.featured ? "Remove from featured" : "Mark as featured"} aria-label={meal.featured ? "Remove from featured" : "Mark as featured"}
+                    className={`p-2 rounded-lg transition ${meal.featured ? "text-yellow-400 hover:bg-yellow-400/10" : "text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/10"}`}>
+                    <Star size={15} className={meal.featured ? "fill-yellow-400" : ""} />
+                  </button>
+                  <button onClick={() => openEdit(meal)} title="Edit meal" aria-label="Edit meal"
                     className="p-2 text-gray-400 hover:text-orange-400 hover:bg-orange-400/10 rounded-lg transition">
                     <Pencil size={15} />
                   </button>
-                  <button onClick={() => handleDelete(meal._id, meal.name)} title="Delete meal"
+                  <button onClick={() => handleDelete(meal._id, meal.name)} title="Delete meal" aria-label="Delete meal"
                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition">
                     <Trash2 size={15} />
                   </button>
@@ -337,7 +377,7 @@ export default function AdminMeals() {
             ))}
           </div>
 
-          {/* Desktop table */}
+       
           <div className="hidden sm:block bg-gray-800 border border-white/10 rounded-2xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
@@ -345,6 +385,7 @@ export default function AdminMeals() {
                   <th className="text-left px-4 py-3">Meal</th>
                   <th className="text-left px-4 py-3">Category</th>
                   <th className="text-left px-4 py-3">Price</th>
+                  <th className="text-left px-4 py-3">Featured</th>
                   <th className="text-right px-4 py-3">Actions</th>
                 </tr>
               </thead>
@@ -375,12 +416,18 @@ export default function AdminMeals() {
                         : `$${meal.price.toLocaleString()}`}
                     </td>
                     <td className="px-4 py-3">
+                      <button onClick={() => toggleFeatured(meal)} title={meal.featured ? "Remove from featured" : "Mark as featured"} aria-label={meal.featured ? "Remove from featured" : "Mark as featured"}
+                        className={`p-1.5 rounded-lg transition ${meal.featured ? "text-yellow-400 bg-yellow-400/10" : "text-gray-600 hover:text-yellow-400 hover:bg-yellow-400/10"}`}>
+                        <Star size={16} className={meal.featured ? "fill-yellow-400" : ""} />
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openEdit(meal)} title="Edit meal"
+                        <button onClick={() => openEdit(meal)} title="Edit meal" aria-label="Edit meal"
                           className="p-1.5 text-gray-400 hover:text-orange-400 hover:bg-orange-400/10 rounded-lg transition">
                           <Pencil size={15} />
                         </button>
-                        <button onClick={() => handleDelete(meal._id, meal.name)} title="Delete meal"
+                        <button onClick={() => handleDelete(meal._id, meal.name)} title="Delete meal" aria-label="Delete meal"
                           className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition">
                           <Trash2 size={15} />
                         </button>
