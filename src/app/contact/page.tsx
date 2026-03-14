@@ -56,7 +56,7 @@ export default function ContactPage() {
         
           <div className="lg:col-span-2 space-y-4">
             {[
-              { icon: Phone, label: "Phone", value: "+1 (773) 698-2341" },
+              { icon: Phone, label: "Phone", value: "+1 (773) 983-1974" },
               { icon: Mail, label: "Email", value: "cateringcornerstone2@gmail.com" },
               { icon: MapPin, label: "Location", value: "Serving across the USA" },
               { icon: Clock, label: "Hours", value: "Mon–Sat: 9am – 8pm" },
