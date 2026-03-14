@@ -16,10 +16,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#110803] via-[#2d1203] to-[#f59e0b]
-        flex items-center justify-center px-4 relative overflow-hidden">
-      
-     
+    <div className="min-h-screen bg-gradient-to-br from-[#110803] via-[#2d1203] to-[#f59e0b] flex items-center justify-center px-4 relative overflow-hidden">
+
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 0.25, scale: 1.4 }}
@@ -31,8 +29,7 @@ export default function LoginPage() {
         initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
         animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
         transition={{ duration: 0.8 }}
-        className="relative backdrop-blur-xl bg-white/10 border border-white/20 
-        shadow-2xl rounded-2xl p-8 w-full max-w-md"
+        className="relative backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-2xl p-8 w-full max-w-md"
       >
         <h1 className="text-3xl font-semibold text-white text-center mb-6">
           Welcome Back
@@ -46,10 +43,8 @@ export default function LoginPage() {
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full mt-1 px-4 py-2 bg-white/5 text-white
-                border border-white/20 rounded-lg outline-none
-                focus:border-orange-400 transition"
-                placeholder="Input Your Email Here"
+              placeholder="Input Your Email Here"
+              className="w-full mt-1 px-4 py-2 bg-white/5 text-white border border-white/20 rounded-lg outline-none focus:border-orange-400 transition"
             />
           </div>
 
@@ -60,20 +55,16 @@ export default function LoginPage() {
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full mt-1 px-4 py-2 bg-white/5 text-white
-                border border-white/20 rounded-lg outline-none
-                focus:border-orange-400 transition"
-                placeholder="Enter your password"
+              placeholder="Enter your password"
+              className="w-full mt-1 px-4 py-2 bg-white/5 text-white border border-white/20 rounded-lg outline-none focus:border-orange-400 transition"
             />
           </div>
 
           <motion.button
+            type="submit"
             whileTap={{ scale: 0.96 }}
             whileHover={{ scale: 1.02 }}
-            className="w-full py-3 rounded-xl text-white font-semibold
-              bg-linear-to-r from-orange-600 via-amber-500 to-yellow-400
-              shadow-[0_0_20px_#f59e0b50] hover:shadow-[0_0_40px_#f59e0b80]
-              transition"
+            className="w-full py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-400 shadow-[0_0_20px_#f59e0b50] hover:shadow-[0_0_40px_#f59e0b80] transition"
           >
             Login
           </motion.button>
@@ -81,11 +72,11 @@ export default function LoginPage() {
 
         <p className="text-white/70 text-center mt-5 text-sm">
           <Link href="/forgot-password" className="text-orange-300 hover:text-orange-200">
-              Forgot Password?
+            Forgot Password?
           </Link>
         </p>
 
-         <p className="text-white/70 text-center mt-5 text-sm">
+        <p className="text-white/70 text-center mt-5 text-sm">
           Do not have an account?{" "}
           <Link href="/signup" className="text-orange-300 hover:text-orange-200">
             Create one

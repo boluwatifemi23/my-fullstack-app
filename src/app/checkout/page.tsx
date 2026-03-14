@@ -10,6 +10,7 @@ import { ChefHat } from "lucide-react";
 import DeliveryForm from "./componenets/DeliveryForm";
 import ReviewOrder from "./componenets/ReviewOrder";
 import PaymentForm from "./componenets/PaymentForm";
+import ZellePayment from "./componenets/ZellePayment";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -32,6 +33,7 @@ export default function CheckoutPage() {
   const { items, clear } = useCart();
   const router = useRouter();
   const [step, setStep] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "zelle">("zelle");
   const [customer, setCustomer] = useState<CustomerInfo>({
     name: "", email: "", phone: "", address: "",
     city: "", state: "", zip: "",
@@ -46,12 +48,12 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-  if (items.length === 0 && step < 2) {
-    router.replace("/");
-  }
-}, [items.length, step, router]);
+    if (items.length === 0 && step < 2) {
+      router.replace("/");
+    }
+  }, [items.length, step, router]);
 
-if (items.length === 0 && step < 2) return null;
+  if (items.length === 0 && step < 2) return null;
 
   const handleDeliverySubmit = async (info: CustomerInfo) => {
     setError("");
@@ -67,31 +69,58 @@ if (items.length === 0 && step < 2) return null;
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customer,
-          items: items.map(i => ({
-            mealId: i._id,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            image: i.image,
-          })),
-          deliveryDate: customer.deliveryDate,
-          deliveryTime: customer.deliveryTime,
-          specialInstructions: customer.specialInstructions,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error); setLoading(false); return; }
-      setClientSecret(data.clientSecret);
-      setOrderId(data.orderId);
-      setTotal(data.total);
-      setDeliveryFee(data.deliveryFee);
-      setSubtotal(data.subtotal);
-      setStep(2);
+      if (paymentMethod === "zelle") {
+       
+        const res = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customer,
+            items: items.map(i => ({
+              mealId: i._id,
+              name: i.name,
+              price: i.price,
+              quantity: i.quantity,
+              image: i.image,
+              selectedVariant: i.selectedVariant,
+            })),
+            specialInstructions: customer.specialInstructions,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setError(data.error || "Something went wrong"); setLoading(false); return; }
+        setOrderId(data.orderId);
+        setTotal(data.total);
+        setSubtotal(data.subtotal);
+        setStep(2);
+      } else {
+       
+        const res = await fetch("/api/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customer,
+            items: items.map(i => ({
+              mealId: i._id,
+              name: i.name,
+              price: i.price,
+              quantity: i.quantity,
+              image: i.image,
+            })),
+            deliveryDate: customer.deliveryDate,
+            deliveryTime: customer.deliveryTime,
+            specialInstructions: customer.specialInstructions,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setError(data.error); setLoading(false); return; }
+        setClientSecret(data.clientSecret);
+        setOrderId(data.orderId);
+        setTotal(data.total);
+        setDeliveryFee(data.deliveryFee);
+        setSubtotal(data.subtotal);
+        setStep(2);
+      }
     } catch {
       setError("Something went wrong. Please try again.");
     }
@@ -118,11 +147,37 @@ if (items.length === 0 && step < 2) return null;
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Checkout</h1>
-            <p className="text-gray-400 text-sm">Secure checkout powered by Stripe</p>
+            <p className="text-gray-400 text-sm">Complete your order securely</p>
           </div>
         </div>
 
-       
+   
+        {step < 2 && (
+          <div className="flex gap-3 mb-6">
+            <button
+              onClick={() => setPaymentMethod("zelle")}
+              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                paymentMethod === "zelle"
+                  ? "bg-purple-500/20 border-purple-500/50 text-purple-300"
+                  : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
+              }`}
+            >
+              💜 Pay with Zelle
+            </button>
+            <button
+              onClick={() => setPaymentMethod("stripe")}
+              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                paymentMethod === "stripe"
+                  ? "bg-orange-500/20 border-orange-500/50 text-orange-300"
+                  : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
+              }`}
+            >
+              💳 Pay with Card
+            </button>
+          </div>
+        )}
+
+        {/* Steps */}
         <div className="flex items-center mb-8">
           {STEPS.map((label, i) => (
             <div key={label} className="flex items-center flex-1 last:flex-none">
@@ -145,14 +200,12 @@ if (items.length === 0 && step < 2) return null;
           ))}
         </div>
 
-        
         {error && (
           <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
             {error}
           </div>
         )}
 
-        
         {step === 0 && (
           <DeliveryForm initial={customer} onSubmit={handleDeliverySubmit} />
         )}
@@ -165,7 +218,15 @@ if (items.length === 0 && step < 2) return null;
             loading={loading}
           />
         )}
-        {step === 2 && clientSecret && (
+        {step === 2 && paymentMethod === "zelle" && (
+          <ZellePayment
+            orderId={orderId}
+            total={total}
+            subtotal={subtotal}
+            onConfirmed={handlePaymentSuccess}
+          />
+        )}
+        {step === 2 && paymentMethod === "stripe" && clientSecret && (
           <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: "night" } }}>
             <PaymentForm
               clientSecret={clientSecret}

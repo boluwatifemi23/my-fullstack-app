@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, ChefHat, Truck, Home, ChevronDown, Loader2, RefreshCw, Eye } from "lucide-react";
+import { Package, ChefHat, Truck, Home, ChevronDown, Loader2, RefreshCw, Eye, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import ConfirmModal from "../components/ConfirmModal";
 
-interface OrderItem { name: string; quantity: number; price: number; }
+interface OrderItem { name: string; quantity: number; price: number; selectedVariant?: { label: string } }
 
 interface Order {
   orderId: string;
@@ -13,8 +14,7 @@ interface Order {
   items: OrderItem[];
   subtotal: number; deliveryFee: number; total: number;
   deliveryStatus: "placed" | "preparing" | "out-for-delivery" | "delivered";
-  paymentStatus: "pending" | "paid" | "failed";
-  deliveryDate: string; deliveryTime: string;
+  paymentStatus: "pending" | "pending_verification" | "paid" | "failed";
   specialInstructions?: string; createdAt: string;
 }
 
@@ -27,12 +27,19 @@ const STATUS_STYLES: Record<string, string> = {
 
 const PAYMENT_STYLES: Record<string, string> = {
   paid: "bg-green-500/10 border-green-500/30 text-green-400",
-  pending: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400",
+  pending: "bg-gray-500/10 border-gray-500/30 text-gray-400",
+  pending_verification: "bg-purple-500/10 border-purple-500/30 text-purple-400",
   failed: "bg-red-500/10 border-red-500/30 text-red-400",
 };
 
-const DELIVERY_STEPS = ["placed", "preparing", "out-for-delivery", "delivered"];
+const PAYMENT_LABELS: Record<string, string> = {
+  paid: "Paid",
+  pending: "Awaiting Payment",
+  pending_verification: "Zelle Sent — Verify",
+  failed: "Failed",
+};
 
+const DELIVERY_STEPS = ["placed", "preparing", "out-for-delivery", "delivered"];
 const STEP_ICONS: Record<string, React.ElementType> = {
   placed: Package, preparing: ChefHat, "out-for-delivery": Truck, delivered: Home,
 };
@@ -77,6 +84,23 @@ export default function AdminOrdersPage() {
     setConfirmModal({ open: false, orderId: "", newStatus: "", label: "" });
   };
 
+  const handleMarkPaid = async (orderId: string) => {
+    setUpdating(orderId);
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        credentials: "include", body: JSON.stringify({ paymentStatus: "paid" }),
+      });
+      if (res.ok) {
+        toast.success("✅ Order marked as paid!");
+        await fetchOrders();
+      } else {
+        toast.error("Failed to update payment status");
+      }
+    } catch { toast.error("Something went wrong"); }
+    setUpdating(null);
+  };
+
   const nextStatus = (current: string) => {
     const idx = DELIVERY_STEPS.indexOf(current);
     return idx < DELIVERY_STEPS.length - 1 ? DELIVERY_STEPS[idx + 1] : null;
@@ -84,14 +108,23 @@ export default function AdminOrdersPage() {
 
   const formatStatus = (s: string) => s.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 
+  const pendingVerification = orders.filter(o => o.paymentStatus === "pending_verification").length;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Orders</h1>
-          <p className="text-gray-400 text-sm mt-1">{orders.length} total orders</p>
+          <p className="text-gray-400 text-sm mt-1">
+            {orders.length} total
+            {pendingVerification > 0 && (
+              <span className="ml-2 px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded-full text-xs font-semibold">
+                {pendingVerification} Zelle pending
+              </span>
+            )}
+          </p>
         </div>
-        <button onClick={fetchOrders}
+        <button onClick={fetchOrders} aria-label="Refresh orders"
           className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-xl text-sm transition-all shrink-0">
           <RefreshCw size={14} /> Refresh
         </button>
@@ -112,13 +145,15 @@ export default function AdminOrdersPage() {
             const next = nextStatus(order.deliveryStatus);
             const Icon = STEP_ICONS[order.deliveryStatus];
             const isExpanded = expanded === order.orderId;
+            const isZellePending = order.paymentStatus === "pending_verification";
 
             return (
               <div key={order.orderId}
-                className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden">
+                className={`bg-white/5 backdrop-blur-md border rounded-2xl overflow-hidden transition-all ${
+                  isZellePending ? "border-purple-500/30" : "border-white/10"
+                }`}>
 
                 <div className="p-4 sm:p-5">
-                 
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-center shrink-0">
@@ -130,7 +165,7 @@ export default function AdminOrdersPage() {
                         <p className="text-gray-500 text-xs truncate hidden sm:block">{order.customer.email}</p>
                       </div>
                     </div>
-                    <button title="expand"
+                    <button title="Toggle order details" aria-label="Toggle order details"
                       onClick={() => setExpanded(isExpanded ? null : order.orderId)}
                       className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all shrink-0">
                       <ChevronDown size={14} className={`text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
@@ -141,30 +176,44 @@ export default function AdminOrdersPage() {
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${STATUS_STYLES[order.deliveryStatus]}`}>
                       {formatStatus(order.deliveryStatus)}
                     </span>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${PAYMENT_STYLES[order.paymentStatus]}`}>
-                      {order.paymentStatus}
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${PAYMENT_STYLES[order.paymentStatus]}`}>
+                      {PAYMENT_LABELS[order.paymentStatus] || order.paymentStatus}
                     </span>
                     <span className="text-orange-400 font-bold text-sm ml-auto">${order.total.toFixed(2)}</span>
                   </div>
 
-               
-                  <div>
-                    {next ? (
+                  <div className="flex flex-wrap gap-2">
+                  
+                    {isZellePending && (
                       <button
                         disabled={updating === order.orderId}
+                        aria-label="Mark payment as received"
+                        onClick={() => handleMarkPaid(order.orderId)}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
+                        {updating === order.orderId
+                          ? <Loader2 size={12} className="animate-spin" />
+                          : <CheckCircle size={12} />}
+                        Confirm Zelle Payment
+                      </button>
+                    )}
+
+                 
+                    {next && (
+                      <button
+                        disabled={updating === order.orderId}
+                        aria-label={`Mark as ${formatStatus(next)}`}
                         onClick={() => setConfirmModal({
                           open: true, orderId: order.orderId, newStatus: next,
                           label: `Mark as "${formatStatus(next)}"?`,
                         })}
-                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
+                        className="flex items-center gap-1.5 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
                         {updating === order.orderId
                           ? <Loader2 size={12} className="animate-spin" />
                           : <Truck size={12} />}
                         {formatStatus(next)}
                       </button>
-                    ) : (
-                      <span className="text-green-400 text-xs font-semibold">✓ Delivered</span>
                     )}
+                    {!next && <span className="text-green-400 text-xs font-semibold">✓ Delivered</span>}
                   </div>
                 </div>
 
@@ -175,16 +224,17 @@ export default function AdminOrdersPage() {
                       <div className="space-y-2">
                         {order.items.map((item, i) => (
                           <div key={i} className="flex justify-between text-sm">
-                            <span className="text-gray-400">{item.name} × {item.quantity}</span>
+                            <span className="text-gray-400">
+                              {item.name}
+                              {item.selectedVariant && <span className="text-gray-500"> ({item.selectedVariant.label})</span>}
+                              {" "}× {item.quantity}
+                            </span>
                             <span className="text-white">${(item.price * item.quantity).toFixed(2)}</span>
                           </div>
                         ))}
                         <div className="border-t border-white/10 pt-2 mt-2 space-y-1">
                           <div className="flex justify-between text-xs text-gray-500">
                             <span>Subtotal</span><span>${order.subtotal.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between text-xs text-gray-500">
-                            <span>Delivery</span><span>${order.deliveryFee.toFixed(2)}</span>
                           </div>
                           <div className="flex justify-between font-bold text-sm">
                             <span className="text-white">Total</span>
@@ -200,9 +250,8 @@ export default function AdminOrdersPage() {
                         <p>📍 {order.customer.address}</p>
                         <p>{order.customer.city}, {order.customer.state} {order.customer.zip}</p>
                         <p>📞 {order.customer.phone}</p>
-                        <p>📅 {order.deliveryDate} · {order.deliveryTime}</p>
                         {order.specialInstructions && (
-                          <p className="italic text-gray-500">{order.specialInstructions}</p>
+                          <p className="italic text-gray-500">&quot;{order.specialInstructions}&quot;</p>
                         )}
                         <p className="text-gray-600 text-xs pt-2">
                           Placed: {new Date(order.createdAt).toLocaleString()}

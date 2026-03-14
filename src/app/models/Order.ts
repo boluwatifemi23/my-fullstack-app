@@ -6,6 +6,7 @@ export interface OrderItem {
   price: number;
   quantity: number;
   image?: string;
+  selectedVariant?: { label: string; price: number };
 }
 
 export interface IOrder {
@@ -25,9 +26,9 @@ export interface IOrder {
   deliveryFee: number;
   total: number;
   specialInstructions?: string;
-  deliveryDate: string;
-  deliveryTime: string;
-  paymentStatus: "pending" | "paid" | "failed";
+  deliveryDate?: string;
+  deliveryTime?: string;
+  paymentStatus: "pending" | "pending_verification" | "paid" | "failed";
   deliveryStatus: "placed" | "preparing" | "out-for-delivery" | "delivered";
   stripePaymentIntentId?: string;
   createdAt?: Date;
@@ -40,6 +41,10 @@ const OrderItemSchema = new Schema<OrderItem>({
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
   image: { type: String },
+  selectedVariant: {
+    label: { type: String },
+    price: { type: Number },
+  },
 });
 
 const OrderSchema = new Schema<IOrder>(
@@ -56,14 +61,14 @@ const OrderSchema = new Schema<IOrder>(
     },
     items: [OrderItemSchema],
     subtotal: { type: Number, required: true },
-    deliveryFee: { type: Number, required: true },
+    deliveryFee: { type: Number, default: 0 },
     total: { type: Number, required: true },
     specialInstructions: { type: String },
-    deliveryDate: { type: String, required: true },
-    deliveryTime: { type: String, required: true },
+    deliveryDate: { type: String },
+    deliveryTime: { type: String },
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed"],
+      enum: ["pending", "pending_verification", "paid", "failed"],
       default: "pending",
     },
     deliveryStatus: {
