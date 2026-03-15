@@ -55,7 +55,7 @@ async function getCategoryData(slug: string) {
   return { category, meals };
 }
 
-// Slugs that are "coming soon" — matches any slug containing "special"
+
 const COMING_SOON_SLUGS = ["special-delicacy", "special-delicacies", "specials", "special"];
 
 function isComingSoon(slug: string): boolean {
@@ -93,7 +93,7 @@ export default async function CategoryPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Coming Soon Banner */}
+     
       {comingSoon && (
         <div className="mb-8 rounded-2xl overflow-hidden border border-orange-500/20 bg-gradient-to-br from-orange-500/10 to-amber-500/5 p-8 text-center">
           <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">

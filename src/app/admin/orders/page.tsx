@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, ChefHat, Truck, Home, ChevronDown, Loader2, RefreshCw, Eye, CheckCircle } from "lucide-react";
+import { Package, ChefHat, Truck, Home, ChevronDown, Loader2, RefreshCw, Eye, Printer, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ConfirmModal from "../components/ConfirmModal";
 
-interface OrderItem { name: string; quantity: number; price: number; selectedVariant?: { label: string } }
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+  selectedVariant?: { label: string };
+}
 
 interface Order {
   orderId: string;
@@ -15,7 +20,10 @@ interface Order {
   subtotal: number; deliveryFee: number; total: number;
   deliveryStatus: "placed" | "preparing" | "out-for-delivery" | "delivered";
   paymentStatus: "pending" | "pending_verification" | "paid" | "failed";
-  specialInstructions?: string; createdAt: string;
+  specialInstructions?: string;
+  deliveryDate?: string;
+  deliveryTime?: string;
+  createdAt: string;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -40,9 +48,140 @@ const PAYMENT_LABELS: Record<string, string> = {
 };
 
 const DELIVERY_STEPS = ["placed", "preparing", "out-for-delivery", "delivered"];
+
 const STEP_ICONS: Record<string, React.ElementType> = {
   placed: Package, preparing: ChefHat, "out-for-delivery": Truck, delivered: Home,
 };
+
+function printOrder(order: Order) {
+  const printWindow = window.open("", "_blank", "width=800,height=600");
+  if (!printWindow) return;
+
+  const itemsHTML = order.items.map(item => `
+    <tr>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;">
+        ${item.name}${item.selectedVariant ? ` <span style="color:#999;font-size:12px;">(${item.selectedVariant.label})</span>` : ""}
+      </td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">$${(item.price * item.quantity).toFixed(2)}</td>
+    </tr>
+  `).join("");
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Order ${order.orderId} — Cornerstone Catering</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; color: #111; padding: 32px; font-size: 14px; }
+        .header { text-align: center; border-bottom: 2px solid #f54a00; padding-bottom: 16px; margin-bottom: 24px; }
+        .logo { font-size: 22px; font-weight: 900; color: #f54a00; }
+        .logo span { color: #111; }
+        .tagline { font-size: 11px; color: #888; margin-top: 2px; }
+        .order-id { font-size: 18px; font-weight: 700; margin-top: 8px; color: #111; }
+        .date { font-size: 11px; color: #888; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+        .customer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .field { margin-bottom: 6px; }
+        .field-label { font-size: 11px; color: #888; }
+        .field-value { font-size: 13px; font-weight: 600; color: #111; }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: #f9f9f9; }
+        th { padding: 8px 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+        th:last-child { text-align: right; }
+        th:nth-child(2) { text-align: center; }
+        .totals { margin-top: 12px; border-top: 2px solid #111; padding-top: 12px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; color: #555; }
+        .total-final { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; color: #f54a00; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-paid { background: #dcfce7; color: #166534; }
+        .badge-pending { background: #fef9c3; color: #854d0e; }
+        .badge-verify { background: #f3e8ff; color: #6b21a8; }
+        .instructions { background: #fff8f0; border: 1px solid #fed7aa; border-radius: 8px; padding: 12px; font-size: 13px; color: #7c2d12; }
+        .footer { margin-top: 32px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #eee; padding-top: 16px; }
+        @media print {
+          body { padding: 16px; }
+          button { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="logo">Cornerstone<span>Catering</span></div>
+        <div class="tagline">Authentic Nigerian Meals — cornerstonecatering.vercel.app</div>
+        <div class="order-id">Order #${order.orderId}</div>
+        <div class="date">Placed: ${new Date(order.createdAt).toLocaleString()}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Customer Details</div>
+        <div class="customer-grid">
+          <div>
+            <div class="field"><div class="field-label">Name</div><div class="field-value">${order.customer.name}</div></div>
+            <div class="field"><div class="field-label">Email</div><div class="field-value">${order.customer.email}</div></div>
+            <div class="field"><div class="field-label">Phone</div><div class="field-value">${order.customer.phone}</div></div>
+          </div>
+          <div>
+            <div class="field"><div class="field-label">Address</div><div class="field-value">${order.customer.address}</div></div>
+            <div class="field"><div class="field-label">City, State ZIP</div><div class="field-value">${order.customer.city}, ${order.customer.state} ${order.customer.zip}</div></div>
+            <div class="field">
+              <div class="field-label">Payment</div>
+              <div class="field-value">
+                <span class="badge ${order.paymentStatus === 'paid' ? 'badge-paid' : order.paymentStatus === 'pending_verification' ? 'badge-verify' : 'badge-pending'}">
+                  ${PAYMENT_LABELS[order.paymentStatus] || order.paymentStatus}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      ${order.deliveryDate || order.deliveryTime ? `
+      <div class="section">
+        <div class="section-title">Delivery Schedule</div>
+        <div class="field"><div class="field-value">📅 ${order.deliveryDate ?? ""} ${order.deliveryTime ? `· ${order.deliveryTime}` : ""}</div></div>
+      </div>
+      ` : ""}
+
+      ${order.specialInstructions ? `
+      <div class="section">
+        <div class="section-title">Special Instructions</div>
+        <div class="instructions">${order.specialInstructions}</div>
+      </div>
+      ` : ""}
+
+      <div class="section">
+        <div class="section-title">Order Items</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>${itemsHTML}</tbody>
+        </table>
+        <div class="totals">
+          <div class="total-row"><span>Subtotal</span><span>$${order.subtotal.toFixed(2)}</span></div>
+          ${order.deliveryFee > 0 ? `<div class="total-row"><span>Delivery Fee</span><span>$${order.deliveryFee.toFixed(2)}</span></div>` : ""}
+          <div class="total-final"><span>TOTAL</span><span>$${order.total.toFixed(2)}</span></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Cornerstone Catering Services — God is our Cornerstone<br/>
+        +1 773-983-1974 · cornerstonecatering.vercel.app
+      </div>
+
+      <script>window.onload = function() { window.print(); }</script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -91,12 +230,8 @@ export default function AdminOrdersPage() {
         method: "PUT", headers: { "Content-Type": "application/json" },
         credentials: "include", body: JSON.stringify({ paymentStatus: "paid" }),
       });
-      if (res.ok) {
-        toast.success("✅ Order marked as paid!");
-        await fetchOrders();
-      } else {
-        toast.error("Failed to update payment status");
-      }
+      if (res.ok) { toast.success("✅ Order marked as paid!"); await fetchOrders(); }
+      else toast.error("Failed to update payment status");
     } catch { toast.error("Something went wrong"); }
     setUpdating(null);
   };
@@ -165,11 +300,24 @@ export default function AdminOrdersPage() {
                         <p className="text-gray-500 text-xs truncate hidden sm:block">{order.customer.email}</p>
                       </div>
                     </div>
-                    <button title="Toggle order details" aria-label="Toggle order details"
-                      onClick={() => setExpanded(isExpanded ? null : order.orderId)}
-                      className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all shrink-0">
-                      <ChevronDown size={14} className={`text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {/* Print button */}
+                      <button
+                        onClick={() => printOrder(order)}
+                        title="Print order"
+                        aria-label="Print order"
+                        className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white rounded-xl transition-all">
+                        <Printer size={14} />
+                      </button>
+                      {/* Expand button */}
+                      <button
+                        title="Toggle order details"
+                        aria-label="Toggle order details"
+                        onClick={() => setExpanded(isExpanded ? null : order.orderId)}
+                        className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all">
+                        <ChevronDown size={14} className={`text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -183,22 +331,20 @@ export default function AdminOrdersPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                  
+                    {/* Confirm Zelle Payment */}
                     {isZellePending && (
                       <button
                         disabled={updating === order.orderId}
-                        aria-label="Mark payment as received"
+                        aria-label="Confirm Zelle payment"
                         onClick={() => handleMarkPaid(order.orderId)}
                         className="flex items-center gap-1.5 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
-                        {updating === order.orderId
-                          ? <Loader2 size={12} className="animate-spin" />
-                          : <CheckCircle size={12} />}
+                        {updating === order.orderId ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
                         Confirm Zelle Payment
                       </button>
                     )}
 
-                 
-                    {next && (
+                    {/* Advance delivery status */}
+                    {next ? (
                       <button
                         disabled={updating === order.orderId}
                         aria-label={`Mark as ${formatStatus(next)}`}
@@ -207,13 +353,12 @@ export default function AdminOrdersPage() {
                           label: `Mark as "${formatStatus(next)}"?`,
                         })}
                         className="flex items-center gap-1.5 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
-                        {updating === order.orderId
-                          ? <Loader2 size={12} className="animate-spin" />
-                          : <Truck size={12} />}
+                        {updating === order.orderId ? <Loader2 size={12} className="animate-spin" /> : <Truck size={12} />}
                         {formatStatus(next)}
                       </button>
+                    ) : (
+                      <span className="text-green-400 text-xs font-semibold">✓ Delivered</span>
                     )}
-                    {!next && <span className="text-green-400 text-xs font-semibold">✓ Delivered</span>}
                   </div>
                 </div>
 
@@ -236,6 +381,11 @@ export default function AdminOrdersPage() {
                           <div className="flex justify-between text-xs text-gray-500">
                             <span>Subtotal</span><span>${order.subtotal.toFixed(2)}</span>
                           </div>
+                          {order.deliveryFee > 0 && (
+                            <div className="flex justify-between text-xs text-gray-500">
+                              <span>Delivery</span><span>${order.deliveryFee.toFixed(2)}</span>
+                            </div>
+                          )}
                           <div className="flex justify-between font-bold text-sm">
                             <span className="text-white">Total</span>
                             <span className="text-orange-400">${order.total.toFixed(2)}</span>
@@ -250,6 +400,7 @@ export default function AdminOrdersPage() {
                         <p>📍 {order.customer.address}</p>
                         <p>{order.customer.city}, {order.customer.state} {order.customer.zip}</p>
                         <p>📞 {order.customer.phone}</p>
+                        {order.deliveryDate && <p>📅 {order.deliveryDate} {order.deliveryTime && `· ${order.deliveryTime}`}</p>}
                         {order.specialInstructions && (
                           <p className="italic text-gray-500">&quot;{order.specialInstructions}&quot;</p>
                         )}
