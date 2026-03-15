@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import ConditionalFooter from "./components/ConditionalFooter";
 import ConditionalNavbar from "./components/ConditionalNavbar";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Toaster position="top-right" />
             <main id="content" className="flex-1">{children}</main>
             <ConditionalFooter />
+             <WhatsAppButton />
           </CartProvider>
         </AuthProvider>
       </body>
