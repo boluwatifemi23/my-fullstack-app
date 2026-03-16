@@ -2,8 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Us - Cornerstone Catering Services",
-  description: "Learn about Cornerstone Catering Services — authentic Nigerian and African food in the USA.",
+  title: "About Us — Our Story & Mission",
+  description: "Cornerstone Catering Services was founded on a love for authentic Nigerian cuisine. Based in Burnsville, MN, we serve Chicago and Minnesota with fresh, homemade Nigerian and African meals.",
+  openGraph: {
+    title: "About Cornerstone Catering Services",
+    description: "Our story — bringing authentic Nigerian and African cuisine to Chicago and Minnesota since 2023.",
+    type: "website",
+  },
 };
 
 export default function AboutPage() {

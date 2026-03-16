@@ -2,8 +2,21 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata = {
-  title: "Catering Services - Cornerstone Catering",
-  description: "Full-service Nigerian and African catering for events, parties, corporate functions and more.",
+  title: "Catering Services — Weddings, Parties & Corporate Events",
+  description: "Full-service Nigerian and African catering for weddings, birthday parties, corporate events and bulk orders in Chicago and Minnesota. From small gatherings to 500+ guests. Request a quote today.",
+  keywords: [
+    "Nigerian catering weddings Chicago",
+    "African food catering Minnesota",
+    "Nigerian party catering",
+    "bulk Nigerian food order",
+    "corporate catering Nigerian food",
+    "African catering events Illinois",
+  ],
+  openGraph: {
+    title: "Catering Services — Cornerstone Catering Services",
+    description: "Full-service Nigerian catering for weddings, parties and corporate events in Chicago and Minnesota.",
+    type: "website",
+  },
 };
 
 const packages = [

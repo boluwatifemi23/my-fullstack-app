@@ -5,11 +5,25 @@ import { LeanCategoryDoc, LeanMealDoc } from "@/app/utils/mongoose-types";
 import CategoriesCarousel from "@/app/components/CategoriesCarousel";
 import MealCardClient from "@/app/components/MealCardClient";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+
 
 export const metadata = {
-  title: "Menu - Cornerstone Catering Services",
-  description: "Explore our authentic Nigerian menu",
+  title: "Menu — Nigerian & African Meals | Order Online",
+  description: "Browse our full menu of authentic Nigerian meals including Jollof Rice, Peppersoup, Small Chops, Soups & Stews, Proteins, Seafood and more. Order online for delivery in Chicago and Minnesota.",
+  keywords: [
+    "Nigerian menu online",
+    "order Nigerian food Chicago",
+    "Jollof Rice delivery",
+    "Nigerian Peppersoup",
+    "African food menu",
+    "small chops order online",
+    "Nigerian soup delivery Chicago",
+  ],
+  openGraph: {
+    title: "Menu — Cornerstone Catering Services",
+    description: "Authentic Nigerian meals — Jollof Rice, Peppersoup, Small Chops, Soups, Proteins and more. Order online.",
+    type: "website",
+  },
 };
 
 export const revalidate = 60;
