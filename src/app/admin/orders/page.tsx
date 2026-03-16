@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, ChefHat, Truck, Home, ChevronDown, Loader2, RefreshCw, Eye, Printer, CheckCircle } from "lucide-react";
+import { Package, ChefHat, Truck, Home, ChevronDown, Loader2, RefreshCw, Eye, Printer, CheckCircle, Navigation } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ConfirmModal from "../components/ConfirmModal";
@@ -23,6 +23,7 @@ interface Order {
   specialInstructions?: string;
   deliveryDate?: string;
   deliveryTime?: string;
+  shipdayOrderId?: string;
   createdAt: string;
 }
 
@@ -48,7 +49,6 @@ const PAYMENT_LABELS: Record<string, string> = {
 };
 
 const DELIVERY_STEPS = ["placed", "preparing", "out-for-delivery", "delivered"];
-
 const STEP_ICONS: Record<string, React.ElementType> = {
   placed: Package, preparing: ChefHat, "out-for-delivery": Truck, delivered: Home,
 };
@@ -101,10 +101,7 @@ function printOrder(order: Order) {
         .badge-verify { background: #f3e8ff; color: #6b21a8; }
         .instructions { background: #fff8f0; border: 1px solid #fed7aa; border-radius: 8px; padding: 12px; font-size: 13px; color: #7c2d12; }
         .footer { margin-top: 32px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #eee; padding-top: 16px; }
-        @media print {
-          body { padding: 16px; }
-          button { display: none; }
-        }
+        @media print { body { padding: 16px; } button { display: none; } }
       </style>
     </head>
     <body>
@@ -114,7 +111,6 @@ function printOrder(order: Order) {
         <div class="order-id">Order #${order.orderId}</div>
         <div class="date">Placed: ${new Date(order.createdAt).toLocaleString()}</div>
       </div>
-
       <div class="section">
         <div class="section-title">Customer Details</div>
         <div class="customer-grid">
@@ -137,31 +133,20 @@ function printOrder(order: Order) {
           </div>
         </div>
       </div>
-
       ${order.deliveryDate || order.deliveryTime ? `
       <div class="section">
         <div class="section-title">Delivery Schedule</div>
         <div class="field"><div class="field-value">📅 ${order.deliveryDate ?? ""} ${order.deliveryTime ? `· ${order.deliveryTime}` : ""}</div></div>
-      </div>
-      ` : ""}
-
+      </div>` : ""}
       ${order.specialInstructions ? `
       <div class="section">
         <div class="section-title">Special Instructions</div>
         <div class="instructions">${order.specialInstructions}</div>
-      </div>
-      ` : ""}
-
+      </div>` : ""}
       <div class="section">
         <div class="section-title">Order Items</div>
         <table>
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Qty</th>
-              <th>Price</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Item</th><th>Qty</th><th>Price</th></tr></thead>
           <tbody>${itemsHTML}</tbody>
         </table>
         <div class="totals">
@@ -170,12 +155,7 @@ function printOrder(order: Order) {
           <div class="total-final"><span>TOTAL</span><span>$${order.total.toFixed(2)}</span></div>
         </div>
       </div>
-
-      <div class="footer">
-        Cornerstone Catering Services — God is our Cornerstone<br/>
-        +1 773-983-1974 · cornerstonecatering.vercel.app
-      </div>
-
+      <div class="footer">Cornerstone Catering Services — God is our Cornerstone<br/>+1 773-983-1974 · cornerstonecatering.vercel.app</div>
       <script>window.onload = function() { window.print(); }</script>
     </body>
     </html>
@@ -187,6 +167,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [dispatching, setDispatching] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     open: boolean; orderId: string; newStatus: string; label: string;
@@ -236,13 +217,30 @@ export default function AdminOrdersPage() {
     setUpdating(null);
   };
 
+  const handleDispatch = async (orderId: string) => {
+    setDispatching(orderId);
+    try {
+      const res = await fetch("/api/orders/dispatch", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        credentials: "include", body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("🚗 Driver dispatched successfully!");
+        await fetchOrders();
+      } else {
+        toast.error(data.error || "Failed to dispatch driver");
+      }
+    } catch { toast.error("Something went wrong"); }
+    setDispatching(null);
+  };
+
   const nextStatus = (current: string) => {
     const idx = DELIVERY_STEPS.indexOf(current);
     return idx < DELIVERY_STEPS.length - 1 ? DELIVERY_STEPS[idx + 1] : null;
   };
 
   const formatStatus = (s: string) => s.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-
   const pendingVerification = orders.filter(o => o.paymentStatus === "pending_verification").length;
 
   return (
@@ -281,6 +279,7 @@ export default function AdminOrdersPage() {
             const Icon = STEP_ICONS[order.deliveryStatus];
             const isExpanded = expanded === order.orderId;
             const isZellePending = order.paymentStatus === "pending_verification";
+            const isDispatched = !!order.shipdayOrderId;
 
             return (
               <div key={order.orderId}
@@ -301,18 +300,11 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      {/* Print button */}
-                      <button
-                        onClick={() => printOrder(order)}
-                        title="Print order"
-                        aria-label="Print order"
+                      <button onClick={() => printOrder(order)} title="Print order" aria-label="Print order"
                         className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white rounded-xl transition-all">
                         <Printer size={14} />
                       </button>
-                      {/* Expand button */}
-                      <button
-                        title="Toggle order details"
-                        aria-label="Toggle order details"
+                      <button title="Toggle details" aria-label="Toggle order details"
                         onClick={() => setExpanded(isExpanded ? null : order.orderId)}
                         className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all">
                         <ChevronDown size={14} className={`text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
@@ -327,15 +319,18 @@ export default function AdminOrdersPage() {
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${PAYMENT_STYLES[order.paymentStatus]}`}>
                       {PAYMENT_LABELS[order.paymentStatus] || order.paymentStatus}
                     </span>
+                    {isDispatched && (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold border bg-teal-500/10 border-teal-500/30 text-teal-400">
+                        🚗 Driver Dispatched
+                      </span>
+                    )}
                     <span className="text-orange-400 font-bold text-sm ml-auto">${order.total.toFixed(2)}</span>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {/* Confirm Zelle Payment */}
+                    {/* Confirm Zelle */}
                     {isZellePending && (
-                      <button
-                        disabled={updating === order.orderId}
-                        aria-label="Confirm Zelle payment"
+                      <button disabled={updating === order.orderId} aria-label="Confirm Zelle payment"
                         onClick={() => handleMarkPaid(order.orderId)}
                         className="flex items-center gap-1.5 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
                         {updating === order.orderId ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
@@ -343,11 +338,21 @@ export default function AdminOrdersPage() {
                       </button>
                     )}
 
-                    {/* Advance delivery status */}
-                    {next ? (
+                    {/* Dispatch Driver — only show if payment confirmed and not already dispatched */}
+                    {order.paymentStatus === "paid" && !isDispatched && (
                       <button
-                        disabled={updating === order.orderId}
-                        aria-label={`Mark as ${formatStatus(next)}`}
+                        disabled={dispatching === order.orderId}
+                        aria-label="Dispatch delivery driver"
+                        onClick={() => handleDispatch(order.orderId)}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-400 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
+                        {dispatching === order.orderId ? <Loader2 size={12} className="animate-spin" /> : <Navigation size={12} />}
+                        {dispatching === order.orderId ? "Dispatching..." : "Dispatch Driver"}
+                      </button>
+                    )}
+
+                    {/* Advance delivery status */}
+                    {next && (
+                      <button disabled={updating === order.orderId} aria-label={`Mark as ${formatStatus(next)}`}
                         onClick={() => setConfirmModal({
                           open: true, orderId: order.orderId, newStatus: next,
                           label: `Mark as "${formatStatus(next)}"?`,
@@ -356,9 +361,8 @@ export default function AdminOrdersPage() {
                         {updating === order.orderId ? <Loader2 size={12} className="animate-spin" /> : <Truck size={12} />}
                         {formatStatus(next)}
                       </button>
-                    ) : (
-                      <span className="text-green-400 text-xs font-semibold">✓ Delivered</span>
                     )}
+                    {!next && <span className="text-green-400 text-xs font-semibold">✓ Delivered</span>}
                   </div>
                 </div>
 
@@ -403,6 +407,9 @@ export default function AdminOrdersPage() {
                         {order.deliveryDate && <p>📅 {order.deliveryDate} {order.deliveryTime && `· ${order.deliveryTime}`}</p>}
                         {order.specialInstructions && (
                           <p className="italic text-gray-500">&quot;{order.specialInstructions}&quot;</p>
+                        )}
+                        {isDispatched && (
+                          <p className="text-teal-400 text-xs font-semibold mt-2">🚗 Shipday ID: {order.shipdayOrderId}</p>
                         )}
                         <p className="text-gray-600 text-xs pt-2">
                           Placed: {new Date(order.createdAt).toLocaleString()}

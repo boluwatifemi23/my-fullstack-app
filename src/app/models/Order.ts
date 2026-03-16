@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, Types, model, models } from "mongoose";
 
 export interface OrderItem {
   mealId: string;
@@ -10,7 +10,7 @@ export interface OrderItem {
 }
 
 export interface IOrder {
-  _id: string;
+  _id: Types.ObjectId;
   orderId: string;
   customer: {
     name: string;
@@ -31,6 +31,7 @@ export interface IOrder {
   paymentStatus: "pending" | "pending_verification" | "paid" | "failed";
   deliveryStatus: "placed" | "preparing" | "out-for-delivery" | "delivered";
   stripePaymentIntentId?: string;
+  shipdayOrderId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -77,6 +78,7 @@ const OrderSchema = new Schema<IOrder>(
       default: "placed",
     },
     stripePaymentIntentId: { type: String },
+    shipdayOrderId: { type: String },
   },
   { timestamps: true }
 );
