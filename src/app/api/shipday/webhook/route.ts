@@ -7,6 +7,15 @@ type DeliveryStatus = IOrder["deliveryStatus"];
 
 export async function POST(req: NextRequest) {
   try {
+   
+    const token = req.headers.get("authorization") ?? req.headers.get("x-shipday-token") ?? "";
+    const validToken = process.env.SHIPDAY_WEBHOOK_TOKEN ?? "";
+
+    if (validToken && token !== validToken && token !== `Bearer ${validToken}`) {
+      console.warn("Shipday webhook: invalid token");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     console.log("Shipday webhook received:", JSON.stringify(body));
 
